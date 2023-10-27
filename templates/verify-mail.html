@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8">
+        <title>Email Confirmation</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+            <div>
+                <div>
+                    <h1>Email Confirmation</h1>
+                    <p>
+                        Thank you for signing up for Save80 Asset Tracker, please click the button below to confirm your email address.
+                    </p>
+                    <p>
+                        <a class="" href="{{ url_for('verify_email', token=token, _external=True) }}"><button class="btn btn-primary">Verify Email</button></b></a>
+                    </p>
+                    <br>
+                    <p>
+                        Alternatively, you can copy and paste the following link in your browser:
+                    </p>
+                    <p>{{ url_for('verify_email', token=token, _external=True) }} </p>
+                    <br>
+                    <p>
+                        If you did not make this request then simply ignore this email.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

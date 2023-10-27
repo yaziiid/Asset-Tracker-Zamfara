@@ -1,0 +1,267 @@
+
+.navbar {
+    /* -webkit-box-shadow: 3px 3px 10px 3px #ddd;
+    -moz-box-shadow: 3px 3px 10px 3px #ddd;
+    box-shadow: 3px 3px 10px 3px #ddd; */
+    -webkit-box-shadow: 3px 3px 0 -30px #dddddd;
+    -moz-box-shadow: 3px 3px 0 -30px #dddddd;
+    box-shadow: 3px 3px 0 -30px #dddddd;
+    background: #d7d7d7;
+    background: -webkit-linear-gradient(0deg, #d7d7d7 0%, #eeeeee 100%);
+    background: linear-gradient(0deg, #d7d7d7 0%, #eeeeee 100%);
+    /* background: #bdc3c7; 
+    background: -webkit-linear-gradient(to bottom, #2c3e50, #bdc3c7); 
+    background: linear-gradient(to bottom, #2c3e50, #bdc3c7);  */
+
+
+    /* padding-bottom: 10px; */
+    /* padding-top: 0px;
+    padding-bottom: 0px; */
+    /* height: 90px; */
+    text-align: center;
+}
+
+
+
+/* .footer-content h3{
+    font-size: 2.1rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    line-height: 3rem;
+} */
+
+/* .infoheader {
+    color: aqua;
+} */
+
+/* .nav-link {
+  color: chartreuse;
+} */
+
+.nav-item a:hover {
+    border-bottom: 4px solid #233b42;
+}
+
+.nav-item .active {
+    border-bottom: 4px solid #134E5E;
+}
+
+.container-shadow {
+    -webkit-box-shadow: 3px 3px 0 -30px #dddddd;
+    -moz-box-shadow: 3px 3px 0 -30px #dddddd;
+    box-shadow: 3px 3px 0 -30px #dddddd;
+    /* -webkit-box-shadow: 3px 3px 10px 3px #ddd;
+    -moz-box-shadow: 3px 3px 10px 3px #ddd;
+    box-shadow: 3px 3px 10px 3px #ddd; */
+    /* background: #b3ffab;
+    background: -webkit-linear-gradient(0deg, #b3ffab 0%, #12fff7 100%);
+    background: linear-gradient(0deg, #b3ffab 0%, #12fff7 100%); */
+    /* background: linear-gradient(to top, #c4c5c7 0%, #dcdddf 52%, #ebebeb 100%); */
+    background: #d7d7d7;
+    background: -webkit-linear-gradient(0deg, #d7d7d7 0%, #eeeeee 100%);
+    background: linear-gradient(0deg, #d7d7d7 0%, #eeeeee 100%);
+}
+
+.card {
+    -webkit-box-shadow: 3px 3px 0 -30px #dddddd;
+    -moz-box-shadow: 3px 3px 0 -30px #dddddd;
+    box-shadow: 3px 3px 0 -30px #dddddd;
+    background: #d7d7d7;
+    background: -webkit-linear-gradient(0deg, #d7d7d7 0%, #eeeeee 100%);
+    background: linear-gradient(0deg, #d7d7d7 0%, #eeeeee 100%);
+
+    /* background: rgba(255,255,255,0.5);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25); */
+}
+
+
+
+
+
+/* ==========Dropdown Styling=========== */
+
+.Select-control {
+    background-color: #E3E3E3 !important;
+    height: 40px;
+}
+
+.Select.is-focused > .Select-control {
+    background-color: #E3E3E3;
+}
+
+#school-input {
+    color: black;
+}
+
+.Select-value-label {
+    color: black;
+}
+
+.Select--single > .Select-control .Select-value, .Select-placeholder {
+    border: transparent;
+    border-radius: 4px;
+    color: black;
+    font-family: 'Lato';
+}
+
+.VirtualizedSelectOption {
+    background-color: white;
+    color: black;
+ }
+
+.VirtualizedSelectFocusedOption {
+    background-color: #E3E3E3;
+    opacity: .7;
+}
+
+.Select.is-focused:not(.is-open) > .Select-control {
+    background-color: #222;
+    border-color: var(--primary); 
+    box-shadow: none;
+}
+
+.search_btn {
+    color: #303030;
+    width: 200px;
+    background-color: #dee2e6;
+    font-weight: bold;
+    border: 1px solid;
+    border-color: #303030;
+  }
+  
+  .search_btn:hover {
+    background-color: #606368;
+    color: whitesmoke;
+  }
+
+  .export {
+    color: #303030;
+    width: 200px;
+    margin-top: 20px;
+    background-color: #dee2e6;
+    font-weight: bold;
+    border: 1px solid;
+    border-color: #303030;
+  }
+  
+  .export:hover {
+    background-color: #606368;
+    color: whitesmoke;
+  }
+
+.content-con {
+  height: calc(100vh - 80px - 118px);
+    background-image: url();
+  }
+
+  .footer_text {
+    color: whitesmoke;
+    font-size: 15px;
+    line-height: 24px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: normal;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* .footer_text {
+    color: #1f3349;
+    font-size: 30px;
+    line-height: 24px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: normal;
+    -webkit-font-smoothing: antialiased;
+  } */
+
+  /* .navbar-brand {
+    position: relative;
+  } */
+.navbar small {
+  position: fixed;
+  top: 93px;
+  left:38px;
+  color:#177D3E;
+  font-size: small;
+}
+
+.Select-arrow {
+  display: none;
+}
+
+.info_footer {
+  display: flex;
+  flex-direction: column;
+}
+
+/* .m-info {
+  margin-top: 30px;
+} */
+
+.main_content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* .atmos_logo {
+  position: fixed;
+  left: 110px;
+}
+
+
+.naseni {
+  position: fixed;
+  left: 10px;  
+} */
+
+
+
+.navbar .Select-control {
+  background-color: whitesmoke !important;
+  height: 40px;
+}
+
+
+.nav-search {
+  margin-top: 40px;
+}
+
+.naseni-col {
+  border-right: 10px #f30c0c;
+}
+
+.font-col:hover .fa {
+  transform: scale(1.2);
+}
+
+.nav_logo1 {
+  max-width: 145px;
+  max-height: 45px;
+  font-size: small;
+  display: block;
+  color: #177D3E;
+  font-style: italic
+}
+
+/* .tbcn-label {
+  margin-left: -10px;
+} */
+.nav_logo2 {
+  max-width: 70px;
+}
+
+/* .Badge {
+  color: #303030;
+} */
+
+.logo-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.tbcn-logo-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
