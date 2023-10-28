@@ -125,8 +125,10 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('That email is taken. Please choose a different one.')
 
 class LoginForm(FlaskForm):
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
+    username = StringField('Username',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+    # email = StringField('Email',
+    #                     validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
@@ -179,7 +181,7 @@ def login():
         return redirect(url_for('/'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(username=form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             if not user.email_verified:
                 send_verify_email(user)
@@ -256,4 +258,4 @@ def reset_token(token):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

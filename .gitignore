@@ -2,3 +2,4 @@ __pycache__
 local_db.ini
 .gcloudignore
 file_system_store
+dump.rdb

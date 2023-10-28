@@ -60,7 +60,7 @@ navbar_2 = dbc.Navbar(
                         ], class_name='logo-div'),
                     ], href='/', style={"textDecoration": "none"}),
                 # dbc.Col(html.H2('Save-80 Asset Tracker', className='mx-auto d-none d-lg-block'), class_name='ml-5'),
-                html.H2('Save-80 Locator', className='ms-5 d-none d-lg-block text-center fs-2', style={'font-family': 'Abril Fatface', 'color': '#333333', }), #'margin-left': '35%'
+                html.H2('Climate Impact Mapper', className='ms-5 d-none d-lg-block text-center fs-2', style={'font-family': 'Abril Fatface', 'color': '#333333', }), #'margin-left': '35%'
                 dbc.NavbarToggler(id='nav-toggler'),
                 dbc.Collapse(nav, id='navbar-collapse', is_open=False, navbar=True, class_name='')
             ], fluid=True, class_name='text-center')

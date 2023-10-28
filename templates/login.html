@@ -15,17 +15,17 @@
         <!-- <img class="mb-4" src="../static/naseni_logo.png" alt="" width="60" height="60"> -->
         <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
         <div class="form-floating">
-            {% if form.email.errors %}
-                {{ form.email(class="form-control is-invalid", id="floatingInput", placeholder="name@example.com") }}
+            {% if form.username.errors %}
+                {{ form.username(class="form-control is-invalid", id="floatingInput", placeholder="name@example.com") }}
                 <div class="invalid-feedback">
-                    {% for error in form.email.errors %}
+                    {% for error in form.username.errors %}
                         <span>{{ error }}</span>
                     {% endfor %}
                 </div>
             {% else %}
-                {{ form.email(class="form-control", id="floatingInput", placeholder="name@example.com") }}
+                {{ form.username(class="form-control", id="floatingInput", placeholder="name@example.com") }}
             {% endif %}
-            <label for="floatingInput">Email address</label>
+            <label for="floatingInput">Username</label>
         </div>
         <div class="form-floating">
             {% if form.password.errors %}
