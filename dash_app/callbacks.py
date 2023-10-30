@@ -174,11 +174,11 @@ def register_callbacks(app):
             )
             customdata_trace = [df['name'].item(), df['address'].item(), df['phone'].item(), df['nin'].item(), df['state'].item()]
 
-            hovertemplate_trace = ('<b>Name: ' + customdata_trace[0] + '<br>' +
-                        '<b>Address: </b> ' + customdata_trace[1] + '<br>' + 
-                        '<b>Phone No.: </b> ' + customdata_trace[2] + '<br>' +
+            hovertemplate_trace = ('<b>Name: ' + str(customdata_trace[0]) + '<br>' +
+                        '<b>Address: </b> ' + str(customdata_trace[1]) + '<br>' + 
+                        '<b>Phone No.: </b> ' + str(customdata_trace[2]) + '<br>' +
                         '<b>Product ID.: </b> ' + str(customdata_trace[3]) + '<br>' +
-                        '<b>State: </b> ' + customdata_trace[4] + '<br>')
+                        '<b>State: </b> ' + str(customdata_trace[4]) + '<br>')
             customer_map.add_scattermapbox(
                 below="", lat=[lat], lon=[lon], customdata=customdata_trace, hovertemplate=hovertemplate_trace,
                 showlegend=False, name='',  hoverlabel = dict(bgcolor="#666DE9", font_size=15, font_color='whitesmoke'),
