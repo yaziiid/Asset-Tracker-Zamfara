@@ -31,7 +31,10 @@ r = redis_con(cloud=cloud)
 
 #fetches data from redis cache or database if database data does not exist in cache
 def fetch_data(r, username, password, hostname, database):
-    raw = r.get('zamfara_customer_db')
+    try:
+        raw = r.get('zamfara_customer_db')
+    except:
+        raw = None
 
     if raw == None:
         config = {'db.url': f'mysql+pymysql://{username}:{password}@{hostname}/{database}'}
