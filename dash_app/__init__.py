@@ -53,10 +53,10 @@ navbar_2 = dbc.Navbar(
                     html.A([
                         dbc.Row([
                             dbc.Col([
-                                html.Img(src='assets/tbcn-logo2.png', className='nav_logo1 img-fluid'),
-                                html.Label("TBCN", htmlFor='nav_logo1', className='nav_logo1 tbcn-label')
+                                html.Img(src='assets/nnpc-logo.png', className='nav_logo1 img-fluid'),
+                                # html.Label("TBCN", htmlFor='nav_logo1', className='nav_logo1 tbcn-label')
                             ], style={'border-right': '1px solid #303030'}, class_name="tbcn-logo-div"), #, width=200, height=80
-                            dbc.Col(html.Img(src='assets/zamfara_logo.png',className='nav_logo2 img-fluid')), #, width=80, height=80
+                            dbc.Col(html.Img(src='assets/nccc-logo.png',className='nav_logo2 img-fluid')), #, width=80, height=80
                         ], class_name='logo-div'),
                     ], href='/', style={"textDecoration": "none"}),
                 # dbc.Col(html.H2('Save-80 Asset Tracker', className='mx-auto d-none d-lg-block'), class_name='ml-5'),
