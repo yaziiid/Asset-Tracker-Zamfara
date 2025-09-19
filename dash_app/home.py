@@ -23,8 +23,7 @@ customer_profile_df['state'] = customer_profile_df['state'].apply(lambda x: 'Not
 
 hovertemplate = ('<b>Name: </b>: %{customdata[1]} <br>' +
                 '<b>Address: </b>: %{customdata[2]}<br>' + 
-                '<b>Phone No.: </b>: %{customdata[3]}<br>' +
-                '<b>Product ID.: </b>: %{customdata[4]}<br>' +
+                '<b>Project ID.: </b>: %{customdata[4]}<br>' +
                 '<b>State: </b>: %{customdata[6]}<br>')
 
 
@@ -79,8 +78,7 @@ customer_map.update_layout(
 markdown_1 = f'''
             * **Name:** 
             * **Address:** 
-            * **Phone No.:** 
-            * **Product ID.: ** 
+            * **Project ID.: ** 
             * **State: ** 
             '''
 
