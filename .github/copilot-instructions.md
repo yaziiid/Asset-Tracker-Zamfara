@@ -198,8 +198,6 @@ Configuration Files:
 
 ## Common Development Tasks
 
-## Common Development Tasks
-
 ### Development Workflow
 1. **Start development environment**:
    ```bash
