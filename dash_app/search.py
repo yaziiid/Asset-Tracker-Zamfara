@@ -5,7 +5,8 @@ import dash_bootstrap_components as dbc
 markdown_1 = f'''
             * **Name:** 
             * **Address:** 
-            * **Project ID.: ** 
+            * **Phone No.:** 
+            * **Product ID.: ** 
             * **No of assets in posession: ** 
             '''
 
@@ -14,6 +15,7 @@ search_layout = html.Div(
             dcc.Dropdown(
                 options=[
                     {'label':'Name', 'value':'name'},
+                    {'label':'Phone No.', 'value':'phone'},
                     {'label':'National ID.', 'value':'nin'}
                 ],
                 id='search_by', placeholder = 'Search by', className='dropdown my-3', searchable=False, clearable=False
