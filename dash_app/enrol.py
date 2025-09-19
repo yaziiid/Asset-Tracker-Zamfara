@@ -17,17 +17,10 @@ address_input = html.Div(
     ],
     className="mb-3")
 
-phone_input = html.Div(
-    [
-        dbc.Label("Phone No.", html_for="form_phone"),
-        dbc.Input(type="tel", id="form_phone", placeholder="Enter customer phone no."),
-    ],
-    className="mb-3")
-
 nin_input = html.Div(
     [
-        dbc.Label("Product ID.", html_for="form_nin"),
-        dbc.Input(type="number", id="form_nin", placeholder="Enter Product ID.")
+        dbc.Label("Project ID.", html_for="form_nin"),
+        dbc.Input(type="number", id="form_nin", placeholder="Enter Project ID.")
     ],
     className="mb-3")
 
@@ -50,8 +43,8 @@ coordinates_input = html.Div(
     className="mb-3")
 
 form = dbc.Form([
-    html.H3('Product Registration Form', className='text-center'),
-    name_input, address_input, phone_input, nin_input, state,
+    html.H3('Project Registration Form', className='text-center'),
+    name_input, address_input, nin_input, state,
     html.Br(),
     html.Br(),
     dbc.Col(dbc.Button(id='enrol_button', children='Submit', class_name='search_btn'), class_name='d-flex justify-content-center'),
