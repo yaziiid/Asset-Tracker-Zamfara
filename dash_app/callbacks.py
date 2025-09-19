@@ -115,17 +115,16 @@ def register_callbacks(app):
             raise PreventUpdate
         data = fetch_data(r, username, password, hostname, database)
         row_idx = cell['row'] + (table_page * 25)
-        product_id = data.iloc[row_idx, :][4]
-        r.set('table_click', str(product_id))
+        project_id = data.iloc[row_idx, :][2]
+        r.set('table_click', str(project_id))
 
         return '/home'
 
     
     hovertemplate = ('<b>Name: </b> %{customdata[1]} <br>' +
                 '<b>Address: </b> %{customdata[2]}<br>' + 
-                '<b>Phone No.: </b> %{customdata[3]}<br>' +
-                '<b>Product ID.: </b> %{customdata[4]}<br>' +
-                '<b>State: </b> %{customdata[8]}<br>')
+                '<b>Project ID.: </b> %{customdata[3]}<br>' +
+                '<b>State: </b> %{customdata[7]}<br>')
     
 
     @app.callback(
@@ -144,7 +143,7 @@ def register_callbacks(app):
         if value==None:
             customer_map = px.scatter_mapbox(
             data, lat='latitude', lon='longitude',
-            hover_name='name', custom_data=['id', 'name', 'address', 'phone', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
+            hover_name='name', custom_data=['id', 'name', 'address', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
             hover_data={'name': False, 'latitude':False, 'longitude':False, 'asset_count':True},
             zoom=6, center=dict(lat=9.0765, lon=8),
             )
@@ -162,7 +161,7 @@ def register_callbacks(app):
             lon = df['longitude'].item()
             customer_map = px.scatter_mapbox(
                 data, lat='latitude', lon='longitude',
-                hover_name='name', custom_data=['id', 'name', 'address', 'phone', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
+                hover_name='name', custom_data=['id', 'name', 'address', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
                 hover_data={'name': False, 'latitude':False, 'longitude':False, 'asset_count':True},
                 zoom=9, center=dict(lat=lat, lon=lon),
                 )
@@ -172,13 +171,12 @@ def register_callbacks(app):
                 margin = dict(l = 0, r = 0, t = 0, b = 0), mapbox_style="mapbox://styles/mapbox/streets-v12", mapbox_accesstoken=map_api,
                 hoverlabel = dict(bgcolor="#666DE9", font_size=15, font_color='whitesmoke'), updatemenus=updatemenus
             )
-            customdata_trace = [df['name'].item(), df['address'].item(), df['phone'].item(), df['nin'].item(), df['state'].item()]
+            customdata_trace = [df['name'].item(), df['address'].item(), df['nin'].item(), df['state'].item()]
 
             hovertemplate_trace = ('<b>Name: ' + str(customdata_trace[0]) + '<br>' +
                         '<b>Address: </b> ' + str(customdata_trace[1]) + '<br>' + 
-                        '<b>Phone No.: </b> ' + str(customdata_trace[2]) + '<br>' +
-                        '<b>Product ID.: </b> ' + str(customdata_trace[3]) + '<br>' +
-                        '<b>State: </b> ' + str(customdata_trace[4]) + '<br>')
+                        '<b>Project ID.: </b> ' + str(customdata_trace[2]) + '<br>' +
+                        '<b>State: </b> ' + str(customdata_trace[3]) + '<br>')
             customer_map.add_scattermapbox(
                 below="", lat=[lat], lon=[lon], customdata=customdata_trace, hovertemplate=hovertemplate_trace,
                 showlegend=False, name='',  hoverlabel = dict(bgcolor="#666DE9", font_size=15, font_color='whitesmoke'),
@@ -209,7 +207,7 @@ def register_callbacks(app):
             if not search_value and value:
                 raise PreventUpdate
         nin = data['nin'].tolist()
-        options = [{'label':str(product_id), 'value':product_id} for product_id in nin]
+        options = [{'label':str(project_id), 'value':project_id} for project_id in nin]
 
         return [o for o in options if o["label"].startswith(search_value)], 50
     
@@ -221,13 +219,12 @@ def register_callbacks(app):
     Input('enrol_button', 'n_clicks'),
     State('customer_name', 'value'),
     State('form_address', 'value'),
-    State('form_phone', 'value'),
     State('form_nin', 'value'),
     State('form_state', 'value'),
     prevent_initial_call=True
     )
-    def enrolment_form(n, name, address, phone, nin, state):
-        data = {'name': name, 'address': address, 'phone': phone, 'nin': nin, 'state':state}
+    def enrolment_form(n, name, address, nin, state):
+        data = {'name': name, 'address': address, 'nin': nin, 'state':state}
         for i in data.values():
             if not i:
                 color = 'danger'
@@ -247,8 +244,8 @@ def register_callbacks(app):
         config = {'db.url': f'mysql+pymysql://{username}:{password}@{hostname}/{database}'}
         engine = engine_from_config(config, prefix='db.')
         # engine = connect_with_connector()
-        query = "insert into zamfara_customers (name, address, phone, nin, latitude, longitude, state, date) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"
-        values = (name, address, phone, nin, lat, lon, state.title(), datetime.now(pytz.timezone('UTC')).date())
+        query = "insert into zamfara_customers (name, address, nin, latitude, longitude, state, date) VALUES(%s, %s, %s, %s, %s, %s, %s)"
+        values = (name, address, nin, lat, lon, state.title(), datetime.now(pytz.timezone('UTC')).date())
         try:
             with engine.connect() as conn:
                 conn.execute(query, values)
@@ -267,7 +264,7 @@ def register_callbacks(app):
             msg = 'Please enter the correct values on the given fields'
         records = fetch_data(r, username, password, hostname, database)
         records.drop(columns=['id', 'asset_count'], inplace=True)
-        records.columns = ['Name', 'Address', 'Phone No.', 'Product ID.', 'Latitude', 'Longitude', 'State', 'Date']
+        records.columns = ['Name', 'Address', 'Project ID.', 'Latitude', 'Longitude', 'State', 'Date']
 
         return color, is_open, msg
 
@@ -275,13 +272,12 @@ def register_callbacks(app):
     @app.callback(
         Output('customer_name', 'value'),
         Output('form_address', 'value'),
-        Output('form_phone', 'value'),
         Output('form_nin', 'value'),
         Output('form_state', 'value'),
         Input('enrol_button', 'n_clicks')
     )
     def clear_form(n):
-        return '','','','',''
+        return '','','',''
     
 
     @app.callback(
@@ -298,7 +294,7 @@ def register_callbacks(app):
             date = datetime.strptime(str_date, '%Y-%m-%d')
             return date.strftime('%d-%m-%Y')
         data['date'] = data['date'].apply(lambda x: format_date(x))
-        data.columns = ['S/N', 'Name', 'Address', 'Phone No.', 'Product ID.', 'Latitude', 'Longitude', 'State', 'Date']
+        data.columns = ['S/N', 'Name', 'Address', 'Project ID.', 'Latitude', 'Longitude', 'State', 'Date']
         total_entries = len(data)
         str = f'Total Entries: {total_entries}'
         return data.to_dict('records'), str
