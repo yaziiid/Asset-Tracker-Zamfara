@@ -70,13 +70,39 @@ This app currently reads configuration from local `.ini` files (`cloud_db.ini` a
    - `MAIL_USERNAME` – Email username
    - `MAIL_PASSWORD` – Email password
 
-**Note:** You may need to modify the Flask app to read from environment variables instead of `.ini` files for production deployment. The current code reads from local config files which won't be available on Heroku.
+**Note:** The Flask application has been modified to read from environment variables first, then fall back to local `.ini` files for local development. This ensures the app works both locally and on Heroku without code changes.
 
 **General config vars:**
 - `SECRET_KEY` – (Django) secret key  
 - `DEBUG` – set to `False` in production
 - `ALLOWED_HOSTS` – include your `<app-name>.herokuapp.com` (Django)
 - Any API keys or environment variables your app needs
+
+## Quick Setup for Asset Tracker App
+
+**1. Set WSGI Module:**
+```
+WSGI_MODULE=main:app
+```
+
+**2. Required Environment Variables:**
+```bash
+# Database Configuration
+DB_HOSTNAME=your-db-host
+DB_USERNAME=your-db-username  
+DB_PASSWORD=your-db-password
+DB_NAME=your-db-name
+REDIS_HOST=your-redis-url
+
+# Application Secrets
+SECRET_KEY=your-flask-secret-key
+GEOCODE_API=your-google-maps-api-key
+MAPBOX_API=your-mapbox-api-key
+
+# Mail Configuration (Optional)
+MAIL_USERNAME=your-email-username
+MAIL_PASSWORD=your-email-password
+```
 
 ## Troubleshooting
 - Missing `Procfile` or incorrect `WSGI_MODULE` will cause the dyno to crash.
