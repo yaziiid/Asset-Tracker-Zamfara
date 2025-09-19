@@ -115,17 +115,16 @@ def register_callbacks(app):
             raise PreventUpdate
         data = fetch_data(r, username, password, hostname, database)
         row_idx = cell['row'] + (table_page * 25)
-        product_id = data.iloc[row_idx, :][4]
-        r.set('table_click', str(product_id))
+        project_id = data.iloc[row_idx, :][3]  # Adjusted index after removing phone column
+        r.set('table_click', str(project_id))
 
         return '/home'
 
     
     hovertemplate = ('<b>Name: </b> %{customdata[1]} <br>' +
                 '<b>Address: </b> %{customdata[2]}<br>' + 
-                '<b>Phone No.: </b> %{customdata[3]}<br>' +
-                '<b>Product ID.: </b> %{customdata[4]}<br>' +
-                '<b>State: </b> %{customdata[8]}<br>')
+                '<b>Project ID.: </b> %{customdata[3]}<br>' +
+                '<b>State: </b> %{customdata[7]}<br>')
     
 
     @app.callback(
@@ -176,9 +175,8 @@ def register_callbacks(app):
 
             hovertemplate_trace = ('<b>Name: ' + str(customdata_trace[0]) + '<br>' +
                         '<b>Address: </b> ' + str(customdata_trace[1]) + '<br>' + 
-                        '<b>Phone No.: </b> ' + str(customdata_trace[2]) + '<br>' +
-                        '<b>Product ID.: </b> ' + str(customdata_trace[3]) + '<br>' +
-                        '<b>State: </b> ' + str(customdata_trace[4]) + '<br>')
+                        '<b>Project ID.: </b> ' + str(customdata_trace[2]) + '<br>' +
+                        '<b>State: </b> ' + str(customdata_trace[3]) + '<br>')
             customer_map.add_scattermapbox(
                 below="", lat=[lat], lon=[lon], customdata=customdata_trace, hovertemplate=hovertemplate_trace,
                 showlegend=False, name='',  hoverlabel = dict(bgcolor="#666DE9", font_size=15, font_color='whitesmoke'),
@@ -209,7 +207,7 @@ def register_callbacks(app):
             if not search_value and value:
                 raise PreventUpdate
         nin = data['nin'].tolist()
-        options = [{'label':str(product_id), 'value':product_id} for product_id in nin]
+        options = [{'label':str(project_id), 'value':project_id} for project_id in nin]
 
         return [o for o in options if o["label"].startswith(search_value)], 50
     
@@ -267,7 +265,7 @@ def register_callbacks(app):
             msg = 'Please enter the correct values on the given fields'
         records = fetch_data(r, username, password, hostname, database)
         records.drop(columns=['id', 'asset_count'], inplace=True)
-        records.columns = ['Name', 'Address', 'Phone No.', 'Product ID.', 'Latitude', 'Longitude', 'State', 'Date']
+        records.columns = ['Name', 'Address', 'Project ID.', 'Latitude', 'Longitude', 'State', 'Date']
 
         return color, is_open, msg
 
@@ -298,7 +296,7 @@ def register_callbacks(app):
             date = datetime.strptime(str_date, '%Y-%m-%d')
             return date.strftime('%d-%m-%Y')
         data['date'] = data['date'].apply(lambda x: format_date(x))
-        data.columns = ['S/N', 'Name', 'Address', 'Phone No.', 'Product ID.', 'Latitude', 'Longitude', 'State', 'Date']
+        data.columns = ['S/N', 'Name', 'Address', 'Project ID.', 'Latitude', 'Longitude', 'State', 'Date']
         total_entries = len(data)
         str = f'Total Entries: {total_entries}'
         return data.to_dict('records'), str
