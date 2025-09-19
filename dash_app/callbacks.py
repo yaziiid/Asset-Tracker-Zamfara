@@ -266,8 +266,8 @@ def register_callbacks(app):
             is_open = True
             msg = 'Please enter the correct values on the given fields'
         records = fetch_data(r, username, password, hostname, database)
-        records.drop(columns=['id', 'asset_count'], inplace=True)
-        records.columns = ['Name', 'Address', 'Phone No.', 'Product ID.', 'Latitude', 'Longitude', 'State', 'Date']
+        records.drop(columns=['id', 'asset_count', 'phone'], inplace=True)
+        records.columns = ['Name', 'Address', 'Product ID.', 'Latitude', 'Longitude', 'State', 'Date']
 
         return color, is_open, msg
 
@@ -291,14 +291,14 @@ def register_callbacks(app):
     )
     def update_records(n):
         data = fetch_data(r, username, password, hostname, database)
-        data.drop(columns=['id', 'asset_count'], inplace=True)
+        data.drop(columns=['id', 'asset_count', 'phone'], inplace=True)
         serial_no = pd.DataFrame([idx + 1 for idx in range(len(data))])
         data.insert(0, 'S/N', serial_no)
         def format_date(str_date):
             date = datetime.strptime(str_date, '%Y-%m-%d')
             return date.strftime('%d-%m-%Y')
         data['date'] = data['date'].apply(lambda x: format_date(x))
-        data.columns = ['S/N', 'Name', 'Address', 'Phone No.', 'Product ID.', 'Latitude', 'Longitude', 'State', 'Date']
+        data.columns = ['S/N', 'Name', 'Address', 'Product ID.', 'Latitude', 'Longitude', 'State', 'Date']
         total_entries = len(data)
         str = f'Total Entries: {total_entries}'
         return data.to_dict('records'), str
