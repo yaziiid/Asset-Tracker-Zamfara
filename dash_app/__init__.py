@@ -14,7 +14,7 @@ style_2 = {
 }
 nav = dbc.Nav([
         dbc.NavItem(dbc.NavLink("Home", id='home', href='/home', style=style_2),  class_name='me-1'),
-        dbc.NavItem(dbc.NavLink("Register", id='register', href='/register', style=style_2),  class_name='me-1'),
+        dbc.NavItem(dbc.NavLink("Register Project", id='register', href='/register', style=style_2),  class_name='me-1'),
         dbc.NavItem(dbc.NavLink("Records", id='records', href='/records', style=style_2),  class_name='me-1'),
         # dbc.NavItem(dbc.NavLink("Search", id='search', href='/search', style=style_2), class_name='me-1'),
         dbc.NavItem(dbc.NavLink("Search", id='search', href='/home', style=style_2), class_name='me-1'),
@@ -37,7 +37,7 @@ search_col = dbc.Container([
     dbc.Collapse(
             dbc.Card([
                 dbc.Row([
-                    dbc.Col(dcc.Dropdown(id = 'home_search', placeholder= 'search product id ', className='dropdown me-auto', optionHeight=50,), className=''), #persistence_type='session'
+                    dbc.Col(dcc.Dropdown(id = 'home_search', placeholder= 'search project id ', className='dropdown me-auto', optionHeight=50,), className=''), #persistence_type='session'
                     # dbc.Col(html.I(id='submit-button', n_clicks=0, className='fa-2x fa-solid fa-magnifying-glass', style={'height':'30px', 'width':'30px'}), class_name='col-3 pt-1 font-col')
                     # dbc.Col(html.A(html.Img(src='assets/search-icon.svg', style={'height':'30px', 'width':'30px'}, className='ml-3 mx-auto search-icon'), href='/home', className='a-tag'), class_name='col-3 pt-1')
                 ], class_name='')
@@ -53,14 +53,14 @@ navbar_2 = dbc.Navbar(
                     html.A([
                         dbc.Row([
                             dbc.Col([
-                                html.Img(src='assets/nnpc-logo.png', className='nav_logo1 img-fluid'),
+                                html.Img(src='assets/nigeria_coat_of_arms.png', className='nav_logo1 img-fluid'),
                                 # html.Label("TBCN", htmlFor='nav_logo1', className='nav_logo1 tbcn-label')
                             ], style={'border-right': '1px solid #303030'}, class_name="tbcn-logo-div"), #, width=200, height=80
-                            dbc.Col(html.Img(src='assets/nccc-logo.png',className='nav_logo2 img-fluid')), #, width=80, height=80
+                            dbc.Col(html.Img(src='assets/nigeria_coat_of_arms.png',className='nav_logo2 img-fluid')), #, width=80, height=80
                         ], class_name='logo-div'),
                     ], href='/', style={"textDecoration": "none"}),
                 # dbc.Col(html.H2('Save-80 Asset Tracker', className='mx-auto d-none d-lg-block'), class_name='ml-5'),
-                html.H2('Climate Impact Mapper', className='ms-5 d-none d-lg-block text-center fs-2', style={'font-family': 'Abril Fatface', 'color': '#333333', }), #'margin-left': '35%'
+                html.H2('National Infrastructure Management System', className='ms-5 d-none d-lg-block text-center fs-2', style={'font-family': 'Abril Fatface', 'color': '#333333', }), #'margin-left': '35%'
                 dbc.NavbarToggler(id='nav-toggler'),
                 dbc.Collapse(nav, id='navbar-collapse', is_open=False, navbar=True, class_name='')
             ], fluid=True, class_name='text-center')
@@ -86,7 +86,7 @@ navbar_2 = dbc.Navbar(
 #         ],class_name='col-6 text-center header-text align-center gy-0'),
 #         dbc.Col([
 #              dcc.Dropdown(
-#                 id = 'home_search', placeholder= 'search name or product id ', className='dropdown nav-search me-auto', optionHeight=50,
+#                 id = 'home_search', placeholder= 'search name or project id ', className='dropdown nav-search me-auto', optionHeight=50,
 #             )
 #         ], class_name='ms-auto mt-3'),
 #         dbc.Col(

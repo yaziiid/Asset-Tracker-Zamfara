@@ -62,11 +62,13 @@ body {
 }
 .logo1 img {
   max-width: 60px;
+  height: auto;
 }
-.logo2 {
+.logo2 img {
   max-width: 60px;
-
+  height: auto;
 }
-.logo3 {
+.logo3 img {
   max-width: 80px;
+  height: auto;
 }
