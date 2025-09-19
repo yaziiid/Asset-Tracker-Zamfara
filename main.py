@@ -22,15 +22,20 @@ config.read('mailconfig.ini')
 ##### Database Configuration ######
 config_db = configparser.ConfigParser()
 config_db.read('cloud_db.ini')
-db_public_ip = config_db['HOST_DATA']['hostname']
-db_user = config_db['USER_DATA']['username']
-db_pass = config_db['USER_DATA']['password']
-db_name = config_db['USER_DATA']['database']
+
+# Use environment variables if available (for Heroku), otherwise fall back to config files
+db_public_ip = os.getenv('DB_HOSTNAME', config_db['HOST_DATA']['hostname'])
+db_user = os.getenv('DB_USERNAME', config_db['USER_DATA']['username'])
+db_pass = os.getenv('DB_PASSWORD', config_db['USER_DATA']['password'])
+db_name = os.getenv('DB_NAME', config_db['USER_DATA']['database'])
+secret_key = os.getenv('SECRET_KEY', config_db['USER_DATA']['SECRET_KEY'])
+geocode_api = os.getenv('GEOCODE_API', config_db['USER_DATA']['geocodeAPI'])
+mapbox_api = os.getenv('MAPBOX_API', config_db['USER_DATA']['mapboxAPI'])
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] =  config_db['USER_DATA']['SECRET_KEY']
-app.config['SQLALCHEMY_DATABASE_URI'] =  f"mysql+pymysql://{db_user}:{db_pass}@{db_public_ip}/{db_name}"
+app.config['SECRET_KEY'] = secret_key
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{db_user}:{db_pass}@{db_public_ip}/{db_name}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -40,8 +45,8 @@ login_manager.login_message_category = 'info'
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = config.get('MAIL_USER', 'username')
-app.config['MAIL_PASSWORD'] = config.get('MAIL_USER', 'password')
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME', config.get('MAIL_USER', 'username'))
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', config.get('MAIL_USER', 'password'))
 mail = Mail(app)
 dash_app = create_dash_app(app)
 @login_manager.user_loader

@@ -3,17 +3,20 @@ import configparser
 import pandas as pd
 from sqlalchemy import engine_from_config
 import io
+import os
 
 config = configparser.ConfigParser()
 config.read('cloud_db.ini')
-redis_host = config.get('HOST_DATA', 'redisHost')
-hostname = config['HOST_DATA']['hostname']
-username = config['USER_DATA']['username']
-password = config['USER_DATA']['password']
-database = config['USER_DATA']['database']
-secret_key = config['USER_DATA']['SECRET_KEY']
-geocodeAPI = config['USER_DATA']['geocodeAPI']
-mapboxAPI = config['USER_DATA']['mapboxAPI']
+
+# Use environment variables if available (for Heroku), otherwise fall back to config files
+redis_host = os.getenv('REDIS_HOST', config.get('HOST_DATA', 'redisHost'))
+hostname = os.getenv('DB_HOSTNAME', config['HOST_DATA']['hostname'])
+username = os.getenv('DB_USERNAME', config['USER_DATA']['username'])
+password = os.getenv('DB_PASSWORD', config['USER_DATA']['password'])
+database = os.getenv('DB_NAME', config['USER_DATA']['database'])
+secret_key = os.getenv('SECRET_KEY', config['USER_DATA']['SECRET_KEY'])
+geocodeAPI = os.getenv('GEOCODE_API', config['USER_DATA']['geocodeAPI'])
+mapboxAPI = os.getenv('MAPBOX_API', config['USER_DATA']['mapboxAPI'])
 
 
 
