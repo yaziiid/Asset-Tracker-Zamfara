@@ -37,7 +37,7 @@ search_col = dbc.Container([
     dbc.Collapse(
             dbc.Card([
                 dbc.Row([
-                    dbc.Col(dcc.Dropdown(id = 'home_search', placeholder= 'search product id ', className='dropdown me-auto', optionHeight=50,), className=''), #persistence_type='session'
+                    dbc.Col(dcc.Dropdown(id = 'home_search', placeholder= 'search project id ', className='dropdown me-auto', optionHeight=50,), className=''), #persistence_type='session'
                     # dbc.Col(html.I(id='submit-button', n_clicks=0, className='fa-2x fa-solid fa-magnifying-glass', style={'height':'30px', 'width':'30px'}), class_name='col-3 pt-1 font-col')
                     # dbc.Col(html.A(html.Img(src='assets/search-icon.svg', style={'height':'30px', 'width':'30px'}, className='ml-3 mx-auto search-icon'), href='/home', className='a-tag'), class_name='col-3 pt-1')
                 ], class_name='')
@@ -86,7 +86,7 @@ navbar_2 = dbc.Navbar(
 #         ],class_name='col-6 text-center header-text align-center gy-0'),
 #         dbc.Col([
 #              dcc.Dropdown(
-#                 id = 'home_search', placeholder= 'search name or product id ', className='dropdown nav-search me-auto', optionHeight=50,
+#                 id = 'home_search', placeholder= 'search name or project id ', className='dropdown nav-search me-auto', optionHeight=50,
 #             )
 #         ], class_name='ms-auto mt-3'),
 #         dbc.Col(
