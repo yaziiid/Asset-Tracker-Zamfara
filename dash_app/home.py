@@ -23,9 +23,8 @@ customer_profile_df['state'] = customer_profile_df['state'].apply(lambda x: 'Not
 
 hovertemplate = ('<b>Name: </b>: %{customdata[1]} <br>' +
                 '<b>Address: </b>: %{customdata[2]}<br>' + 
-                '<b>Phone No.: </b>: %{customdata[3]}<br>' +
-                '<b>Project ID.: </b>: %{customdata[4]}<br>' +
-                '<b>State: </b>: %{customdata[6]}<br>')
+                '<b>Project ID.: </b>: %{customdata[3]}<br>' +
+                '<b>State: </b>: %{customdata[7]}<br>')
 
 
 
@@ -54,7 +53,7 @@ for label, style in map_styles:
 
 customer_map = px.scatter_mapbox(
     customer_profile_df, lat='latitude', lon='longitude',
-    hover_name='name', custom_data=['id', 'name', 'address', 'phone', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
+    hover_name='name', custom_data=['id', 'name', 'address', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
     hover_data={'name': False, 'latitude':False, 'longitude':False, 'asset_count':True},
     zoom=6, center=dict(lat=9.0765, lon=8),
     mapbox_style = 'carto-positron', height=800, )
@@ -79,7 +78,6 @@ customer_map.update_layout(
 markdown_1 = f'''
             * **Name:** 
             * **Address:** 
-            * **Phone No.:** 
             * **Project ID.: ** 
             * **State: ** 
             '''

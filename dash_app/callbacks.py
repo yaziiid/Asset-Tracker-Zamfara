@@ -123,9 +123,8 @@ def register_callbacks(app):
     
     hovertemplate = ('<b>Name: </b> %{customdata[1]} <br>' +
                 '<b>Address: </b> %{customdata[2]}<br>' + 
-                '<b>Phone No.: </b> %{customdata[3]}<br>' +
-                '<b>Project ID.: </b> %{customdata[4]}<br>' +
-                '<b>State: </b> %{customdata[8]}<br>')
+                '<b>Project ID.: </b> %{customdata[3]}<br>' +
+                '<b>State: </b> %{customdata[7]}<br>')
     
 
     @app.callback(
@@ -144,7 +143,7 @@ def register_callbacks(app):
         if value==None:
             customer_map = px.scatter_mapbox(
             data, lat='latitude', lon='longitude',
-            hover_name='name', custom_data=['id', 'name', 'address', 'phone', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
+            hover_name='name', custom_data=['id', 'name', 'address', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
             hover_data={'name': False, 'latitude':False, 'longitude':False, 'asset_count':True},
             zoom=6, center=dict(lat=9.0765, lon=8),
             )
@@ -162,7 +161,7 @@ def register_callbacks(app):
             lon = df['longitude'].item()
             customer_map = px.scatter_mapbox(
                 data, lat='latitude', lon='longitude',
-                hover_name='name', custom_data=['id', 'name', 'address', 'phone', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
+                hover_name='name', custom_data=['id', 'name', 'address', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
                 hover_data={'name': False, 'latitude':False, 'longitude':False, 'asset_count':True},
                 zoom=9, center=dict(lat=lat, lon=lon),
                 )
@@ -172,13 +171,12 @@ def register_callbacks(app):
                 margin = dict(l = 0, r = 0, t = 0, b = 0), mapbox_style="mapbox://styles/mapbox/streets-v12", mapbox_accesstoken=map_api,
                 hoverlabel = dict(bgcolor="#666DE9", font_size=15, font_color='whitesmoke'), updatemenus=updatemenus
             )
-            customdata_trace = [df['name'].item(), df['address'].item(), df['phone'].item(), df['nin'].item(), df['state'].item()]
+            customdata_trace = [df['name'].item(), df['address'].item(), df['nin'].item(), df['state'].item()]
 
             hovertemplate_trace = ('<b>Name: ' + str(customdata_trace[0]) + '<br>' +
                         '<b>Address: </b> ' + str(customdata_trace[1]) + '<br>' + 
-                        '<b>Phone No.: </b> ' + str(customdata_trace[2]) + '<br>' +
-                        '<b>Project ID.: </b> ' + str(customdata_trace[3]) + '<br>' +
-                        '<b>State: </b> ' + str(customdata_trace[4]) + '<br>')
+                        '<b>Project ID.: </b> ' + str(customdata_trace[2]) + '<br>' +
+                        '<b>State: </b> ' + str(customdata_trace[3]) + '<br>')
             customer_map.add_scattermapbox(
                 below="", lat=[lat], lon=[lon], customdata=customdata_trace, hovertemplate=hovertemplate_trace,
                 showlegend=False, name='',  hoverlabel = dict(bgcolor="#666DE9", font_size=15, font_color='whitesmoke'),
