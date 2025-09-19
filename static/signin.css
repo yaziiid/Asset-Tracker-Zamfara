@@ -63,9 +63,10 @@ body {
 .logo1 img {
   max-width: 60px;
 }
-.logo2 img {
+.logo2 {
   max-width: 60px;
+
 }
-.logo3 img {
+.logo3 {
   max-width: 80px;
 }
