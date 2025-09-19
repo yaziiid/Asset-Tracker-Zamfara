@@ -1,5 +1,7 @@
 __pycache__
 local_db.ini
+cloud_db.ini
+mailconfig.ini
 .gcloudignore
 file_system_store
 dump.rdb
