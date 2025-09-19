@@ -1,1 +1,1 @@
-web: gunicorn main:app
+web: sh -lc "gunicorn ${WSGI_MODULE:-app:app}"
