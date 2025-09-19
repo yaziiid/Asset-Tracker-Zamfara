@@ -219,13 +219,12 @@ def register_callbacks(app):
     Input('enrol_button', 'n_clicks'),
     State('customer_name', 'value'),
     State('form_address', 'value'),
-    State('form_phone', 'value'),
     State('form_nin', 'value'),
     State('form_state', 'value'),
     prevent_initial_call=True
     )
-    def enrolment_form(n, name, address, phone, nin, state):
-        data = {'name': name, 'address': address, 'phone': phone, 'nin': nin, 'state':state}
+    def enrolment_form(n, name, address, nin, state):
+        data = {'name': name, 'address': address, 'nin': nin, 'state':state}
         for i in data.values():
             if not i:
                 color = 'danger'
@@ -245,8 +244,8 @@ def register_callbacks(app):
         config = {'db.url': f'mysql+pymysql://{username}:{password}@{hostname}/{database}'}
         engine = engine_from_config(config, prefix='db.')
         # engine = connect_with_connector()
-        query = "insert into zamfara_customers (name, address, phone, nin, latitude, longitude, state, date) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"
-        values = (name, address, phone, nin, lat, lon, state.title(), datetime.now(pytz.timezone('UTC')).date())
+        query = "insert into zamfara_customers (name, address, nin, latitude, longitude, state, date) VALUES(%s, %s, %s, %s, %s, %s, %s)"
+        values = (name, address, nin, lat, lon, state.title(), datetime.now(pytz.timezone('UTC')).date())
         try:
             with engine.connect() as conn:
                 conn.execute(query, values)
@@ -273,13 +272,12 @@ def register_callbacks(app):
     @app.callback(
         Output('customer_name', 'value'),
         Output('form_address', 'value'),
-        Output('form_phone', 'value'),
         Output('form_nin', 'value'),
         Output('form_state', 'value'),
         Input('enrol_button', 'n_clicks')
     )
     def clear_form(n):
-        return '','','','',''
+        return '','','',''
     
 
     @app.callback(
