@@ -115,7 +115,7 @@ def register_callbacks(app):
             raise PreventUpdate
         data = fetch_data(r, username, password, hostname, database)
         row_idx = cell['row'] + (table_page * 25)
-        project_id = data.iloc[row_idx, :][4]
+        project_id = data.iloc[row_idx, :][2]
         r.set('table_click', str(project_id))
 
         return '/home'
@@ -143,7 +143,7 @@ def register_callbacks(app):
         if value==None:
             customer_map = px.scatter_mapbox(
             data, lat='latitude', lon='longitude',
-            hover_name='name', custom_data=['id', 'name', 'address', 'phone', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
+            hover_name='name', custom_data=['id', 'name', 'address', 'nin', 'asset_count', 'latitude', 'longitude', 'state'],
             hover_data={'name': False, 'latitude':False, 'longitude':False, 'asset_count':True},
             zoom=6, center=dict(lat=9.0765, lon=8),
             )
