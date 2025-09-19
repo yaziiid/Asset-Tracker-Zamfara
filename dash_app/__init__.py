@@ -14,7 +14,7 @@ style_2 = {
 }
 nav = dbc.Nav([
         dbc.NavItem(dbc.NavLink("Home", id='home', href='/home', style=style_2),  class_name='me-1'),
-        dbc.NavItem(dbc.NavLink("Register", id='register', href='/register', style=style_2),  class_name='me-1'),
+        dbc.NavItem(dbc.NavLink("Register Project", id='register', href='/register', style=style_2),  class_name='me-1'),
         dbc.NavItem(dbc.NavLink("Records", id='records', href='/records', style=style_2),  class_name='me-1'),
         # dbc.NavItem(dbc.NavLink("Search", id='search', href='/search', style=style_2), class_name='me-1'),
         dbc.NavItem(dbc.NavLink("Search", id='search', href='/home', style=style_2), class_name='me-1'),
@@ -86,7 +86,7 @@ navbar_2 = dbc.Navbar(
 #         ],class_name='col-6 text-center header-text align-center gy-0'),
 #         dbc.Col([
 #              dcc.Dropdown(
-#                 id = 'home_search', placeholder= 'search name or product id ', className='dropdown nav-search me-auto', optionHeight=50,
+#                 id = 'home_search', placeholder= 'search name or project id ', className='dropdown nav-search me-auto', optionHeight=50,
 #             )
 #         ], class_name='ms-auto mt-3'),
 #         dbc.Col(
