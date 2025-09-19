@@ -14,7 +14,7 @@ style_2 = {
 }
 nav = dbc.Nav([
         dbc.NavItem(dbc.NavLink("Home", id='home', href='/home', style=style_2),  class_name='me-1'),
-        dbc.NavItem(dbc.NavLink("Register", id='register', href='/register', style=style_2),  class_name='me-1'),
+        dbc.NavItem(dbc.NavLink("Register Project", id='register', href='/register', style=style_2),  class_name='me-1'),
         dbc.NavItem(dbc.NavLink("Records", id='records', href='/records', style=style_2),  class_name='me-1'),
         # dbc.NavItem(dbc.NavLink("Search", id='search', href='/search', style=style_2), class_name='me-1'),
         dbc.NavItem(dbc.NavLink("Search", id='search', href='/home', style=style_2), class_name='me-1'),
