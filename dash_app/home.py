@@ -6,6 +6,7 @@ from sqlalchemy import engine_from_config
 import pandas as pd
 import plotly.graph_objects as go
 from dash_app.redis_con import username, password, hostname, database, mapboxAPI
+from dash_app.map_config import buttons
 
 
 
@@ -21,29 +22,14 @@ customer_profile_df['state'] = customer_profile_df['state'].apply(lambda x: 'Not
 
 
 
-hovertemplate = ('<b>Name: </b>: %{customdata[1]} <br>' +
-                '<b>Address: </b>: %{customdata[2]}<br>' + 
-                '<b>Project ID.: </b>: %{customdata[3]}<br>' +
-                '<b>State: </b>: %{customdata[7]}<br>')
+hovertemplate = ('<b>Name: </b> %{customdata[1]} <br>' +
+                '<b>Address: </b> %{customdata[2]}<br>' + 
+                '<b>Project ID.: </b> %{customdata[3]}<br>' +
+                '<b>State: </b> %{customdata[7]}<br>')
 
 
 
-# Define the available map styles
-map_styles = [
-    ("Streets", "mapbox://styles/mapbox/streets-v12"),
-    ("Satellite", "mapbox://styles/mapbox/satellite-streets-v12"),
-    ("Dark", "mapbox://styles/mapbox/dark-v11"),
-]
-# Create the button
-buttons = []
-for label, style in map_styles:
-    buttons.append(
-        dict(
-            label=label,
-            method="relayout",
-            args=[{"mapbox.style": style}]
-        )
-    )
+
 
 
 

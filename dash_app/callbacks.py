@@ -12,38 +12,12 @@ import googlemaps
 from dash_app.redis_con import r, fetch_data, username, password, hostname, database, mapboxAPI, geocodeAPI
 from datetime import datetime
 import pytz
+from dash_app.map_config import updatemenus
 
 
 
 
-# Define the available map styles
-map_styles = [
-    ("Streets", "mapbox://styles/mapbox/streets-v12"),
-    ("Satellite", "mapbox://styles/mapbox/satellite-streets-v12"),
-    ("Dark", "mapbox://styles/mapbox/dark-v11"),
-]
-# Create the button
-buttons = []
-for label, style in map_styles:
-    buttons.append(
-        dict(
-            label=label,
-            method="relayout",
-            args=[{"mapbox.style": style}]
-        )
-    )
- # Adds button to map   
-updatemenus=[
-    go.layout.Updatemenu(
-        buttons=buttons,
-        direction="down",
-        showactive=True,
-        x=0,
-        xanchor="left",
-        y=1,
-        yanchor="top"
-        )
-    ]
+
 
 
 def register_callbacks(app):
