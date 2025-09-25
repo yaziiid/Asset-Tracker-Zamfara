@@ -5,3 +5,9 @@ mailconfig.ini
 .gcloudignore
 file_system_store
 dump.rdb
+.env
+*.log
+.env.local
+.env.development
+.env.test
+.env.production

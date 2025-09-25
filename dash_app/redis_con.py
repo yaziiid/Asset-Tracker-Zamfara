@@ -9,11 +9,26 @@ config = configparser.ConfigParser()
 config.read('cloud_db.ini')
 
 # Use environment variables if available (for Heroku), otherwise fall back to config files
-redis_host = os.getenv('REDIS_HOST', config.get('HOST_DATA', 'redisHost'))
-hostname = os.getenv('DB_HOSTNAME', config['HOST_DATA']['hostname'])
-username = os.getenv('DB_USERNAME', config['USER_DATA']['username'])
-password = os.getenv('DB_PASSWORD', config['USER_DATA']['password'])
-database = os.getenv('DB_NAME', config['USER_DATA']['database'])
+# Support both REDISCLOUD_URL and REDIS_URL for Redis Cloud add-on
+redis_url = os.getenv('REDISCLOUD_URL') or os.getenv('REDIS_URL') or os.getenv('REDIS_HOST', config.get('HOST_DATA', 'redisHost'))
+
+# Database configuration - support both DATABASE_URL and individual vars
+database_url = os.getenv('DATABASE_URL') or os.getenv('JAWSDB_URL')
+if database_url:
+    # Extract individual components from DATABASE_URL if needed for legacy code
+    from urllib.parse import urlparse
+    parsed = urlparse(database_url)
+    hostname = parsed.hostname
+    username = parsed.username  
+    password = parsed.password
+    database = parsed.path[1:]  # Remove leading slash
+else:
+    # Fall back to individual environment variables or config file
+    hostname = os.getenv('DB_HOSTNAME', config['HOST_DATA']['hostname'])
+    username = os.getenv('DB_USERNAME', config['USER_DATA']['username'])
+    password = os.getenv('DB_PASSWORD', config['USER_DATA']['password'])
+    database = os.getenv('DB_NAME', config['USER_DATA']['database'])
+
 secret_key = os.getenv('SECRET_KEY', config['USER_DATA']['SECRET_KEY'])
 geocodeAPI = os.getenv('GEOCODE_API', config['USER_DATA']['geocodeAPI'])
 mapboxAPI = os.getenv('MAPBOX_API', config['USER_DATA']['mapboxAPI'])
@@ -23,9 +38,9 @@ mapboxAPI = os.getenv('MAPBOX_API', config['USER_DATA']['mapboxAPI'])
 cloud = True
 def redis_con(cloud):
     if cloud:
-        r = redis.Redis.from_url(redis_host, decode_responses=True)
+        r = redis.Redis.from_url(redis_url, decode_responses=True)
         return r
-    r = redis.Redis(host=redis_host, port=6379, decode_responses=True)
+    r = redis.Redis(host=redis_url, port=6379, decode_responses=True)
     return r
 
 r = redis_con(cloud=cloud)

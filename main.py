@@ -24,18 +24,26 @@ config_db = configparser.ConfigParser()
 config_db.read('cloud_db.ini')
 
 # Use environment variables if available (for Heroku), otherwise fall back to config files
-db_public_ip = os.getenv('DB_HOSTNAME', config_db['HOST_DATA']['hostname'])
-db_user = os.getenv('DB_USERNAME', config_db['USER_DATA']['username'])
-db_pass = os.getenv('DB_PASSWORD', config_db['USER_DATA']['password'])
-db_name = os.getenv('DB_NAME', config_db['USER_DATA']['database'])
+# Support both DATABASE_URL (standard) and JAWSDB_URL (JawsDB specific)
+database_url = os.getenv('DATABASE_URL') or os.getenv('JAWSDB_URL')
+if database_url:
+    # Parse the database URL for JawsDB or other providers
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url.replace('mysql://', 'mysql+pymysql://')
+else:
+    # Fall back to individual environment variables or config file
+    db_public_ip = os.getenv('DB_HOSTNAME', config_db['HOST_DATA']['hostname'])
+    db_user = os.getenv('DB_USERNAME', config_db['USER_DATA']['username'])
+    db_pass = os.getenv('DB_PASSWORD', config_db['USER_DATA']['password'])
+    db_name = os.getenv('DB_NAME', config_db['USER_DATA']['database'])
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{db_user}:{db_pass}@{db_public_ip}/{db_name}"
+
 secret_key = os.getenv('SECRET_KEY', config_db['USER_DATA']['SECRET_KEY'])
 geocode_api = os.getenv('GEOCODE_API', config_db['USER_DATA']['geocodeAPI'])
 mapbox_api = os.getenv('MAPBOX_API', config_db['USER_DATA']['mapboxAPI'])
 
-
-app = Flask(__name__)
 app.config['SECRET_KEY'] = secret_key
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{db_user}:{db_pass}@{db_public_ip}/{db_name}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
