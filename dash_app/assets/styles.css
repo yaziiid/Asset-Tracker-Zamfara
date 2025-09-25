@@ -247,7 +247,19 @@
   margin-left: -10px;
 } */
 .nav_logo2 {
+  max-width: 70px;
+  height: auto;
+}
+
+/* Consistent logo sizing */
+.logo1 img, .logo2 img, .logo3 img {
   max-width: 60px;
+  height: auto;
+}
+
+/* Override where 80px is required */
+.logo3 img {
+  max-width: 80px;
 }
 
 /* .Badge {
