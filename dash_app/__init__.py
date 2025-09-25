@@ -60,7 +60,7 @@ navbar_2 = dbc.Navbar(
                         ], class_name='logo-div'),
                     ], href='/', style={"textDecoration": "none"}),
                 # dbc.Col(html.H2('Save-80 Asset Tracker', className='mx-auto d-none d-lg-block'), class_name='ml-5'),
-                html.H2('National Infrastructure Management System', className='ms-5 d-none d-lg-block text-center fs-2', style={'font-family': 'Abril Fatface', 'color': '#333333', }), #'margin-left': '35%'
+                html.H2('National Infrastructure Monitoring System', className='ms-5 d-none d-lg-block text-center fs-2', style={'font-family': 'Abril Fatface', 'color': '#333333', }), #'margin-left': '35%'
                 dbc.NavbarToggler(id='nav-toggler'),
                 dbc.Collapse(nav, id='navbar-collapse', is_open=False, navbar=True, class_name='')
             ], fluid=True, class_name='text-center')
@@ -158,7 +158,7 @@ font_awesome = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/al
 
 def create_dash_app(server):
     dash_app = DashProxy(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME], transforms=[ServersideOutputTransform()], server=server, url_base_pathname='/', meta_tags=meta_tags)
-    dash_app.title = "National Infrastructure Management System"
+    dash_app.title = "National Infrastructure Monitoring System"
     # server = dash_app.server
     dash_app.validation_layout = html.Div([main_layout, home_layout, form_layout, customer_records, search_layout])
     dash_app.layout = main_layout
