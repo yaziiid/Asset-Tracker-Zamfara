@@ -55,7 +55,7 @@ customer_records = dbc.Container(
                 ),
             ))
         ], class_name='col-xs-12 col-lg-10 shadow rounded')
-    ],class_name='justify-content-center align-items-center gx-1')
-, fluid=True)
+    ],class_name='justify-content-center align-items-center gx-1'), 
+    fluid=True)
 
 
