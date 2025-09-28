@@ -53,14 +53,14 @@ navbar_2 = dbc.Navbar(
                     html.A([
                         dbc.Row([
                             dbc.Col([
-                                html.Img(src='assets/nnpc-logo.png', className='nav_logo1 img-fluid'),
+                                html.Img(src='assets/tbcn-logo2.png', className='nav_logo1 img-fluid'),
                                 # html.Label("TBCN", htmlFor='nav_logo1', className='nav_logo1 tbcn-label')
                             ], style={'border-right': '1px solid #303030'}, class_name="tbcn-logo-div"), #, width=200, height=80
-                            dbc.Col(html.Img(src='assets/nccc-logo.png',className='nav_logo2 img-fluid')), #, width=80, height=80
+                            dbc.Col(html.Img(src='assets/coat_of_arms.png',className='nav_logo2 img-fluid')), #, width=80, height=80
                         ], class_name='logo-div'),
                     ], href='/', style={"textDecoration": "none"}),
                 # dbc.Col(html.H2('Save-80 Asset Tracker', className='mx-auto d-none d-lg-block'), class_name='ml-5'),
-                html.H2('Climate Impact Mapper', className='ms-5 d-none d-lg-block text-center fs-2', style={'font-family': 'Abril Fatface', 'color': '#333333', }), #'margin-left': '35%'
+                html.H2('National Infrastructure Monitoring System', className='ms-5 d-none d-lg-block text-center fs-2', style={'font-family': 'Abril Fatface', 'color': '#333333', }), #'margin-left': '35%'
                 dbc.NavbarToggler(id='nav-toggler'),
                 dbc.Collapse(nav, id='navbar-collapse', is_open=False, navbar=True, class_name='')
             ], fluid=True, class_name='text-center')

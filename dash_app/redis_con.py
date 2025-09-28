@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config
 import io
 
 config = configparser.ConfigParser()
-config.read('cloud_db.ini')
+config.read('local_db.ini')
 redis_host = config.get('HOST_DATA', 'redisHost')
 hostname = config['HOST_DATA']['hostname']
 username = config['USER_DATA']['username']
@@ -17,7 +17,7 @@ mapboxAPI = config['USER_DATA']['mapboxAPI']
 
 
 
-cloud = True
+cloud = False
 def redis_con(cloud):
     if cloud:
         r = redis.Redis.from_url(redis_host, decode_responses=True)

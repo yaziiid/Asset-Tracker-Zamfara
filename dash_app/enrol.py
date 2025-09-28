@@ -5,15 +5,15 @@ import dash_bootstrap_components as dbc
 
 name_input = html.Div(
     [
-        dbc.Label("Name", html_for="customer_name"),
-        dbc.Input(type="text", id="customer_name", placeholder="Enter customer name"),
+        dbc.Label("Client Name", html_for="customer_name"),
+        dbc.Input(type="text", id="customer_name", placeholder="Enter client name"),
     ],
     className="mb-3")
 
 address_input = html.Div(
     [
         dbc.Label("Address", html_for="form_address"),
-        dbc.Input(type="text", id="form_address", placeholder="Enter customer's full address"),
+        dbc.Input(type="text", id="form_address", placeholder="Enter client's full address"),
     ],
     className="mb-3")
 
@@ -26,8 +26,8 @@ phone_input = html.Div(
 
 nin_input = html.Div(
     [
-        dbc.Label("Product ID.", html_for="form_nin"),
-        dbc.Input(type="number", id="form_nin", placeholder="Enter Product ID.")
+        dbc.Label("Project", html_for="form_nin"),
+        dbc.Input(type="number", id="form_nin", placeholder="Enter Project Name")
     ],
     className="mb-3")
 
@@ -50,8 +50,8 @@ coordinates_input = html.Div(
     className="mb-3")
 
 form = dbc.Form([
-    html.H3('Product Registration Form', className='text-center'),
-    name_input, address_input, phone_input, nin_input, state,
+    html.H3('Project Registration Form', className='text-center'),
+    name_input, address_input, nin_input, state, #phone_input,
     html.Br(),
     html.Br(),
     dbc.Col(dbc.Button(id='enrol_button', children='Submit', class_name='search_btn'), class_name='d-flex justify-content-center'),

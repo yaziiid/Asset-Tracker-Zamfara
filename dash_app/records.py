@@ -17,7 +17,8 @@ def format_date(str_date):
     date = datetime.strptime(str_date, '%Y-%m-%d')
     return date.strftime('%d-%m-%Y')
 data['date'] = data['date'].apply(lambda x: format_date(x))
-data.columns = ['S/N', 'Name', 'Address', 'Phone No.', 'Product ID.', 'Latitude', 'Longitude', 'State', 'Date']
+data.columns = ['S/N', 'Name', 'Address', 'Phone No.', 'Project', 'Latitude', 'Longitude', 'State', 'Date']
+data = data.drop("Phone No.", axis=1) #removed the phone number from the column
 columns=[{'name':i, 'id':i} for i in data.columns]
 total_entries = len(data)
 
@@ -50,7 +51,7 @@ customer_records = dbc.Container(
                     [
                         {
                             'if': {'column_id': c}, 'textAlign':'right' 
-                        } for c in ['Phone No.', 'Product ID.']
+                        } for c in ['Project'] #['Phone No.', 'Project']
                     ]
                 ),
             ))
