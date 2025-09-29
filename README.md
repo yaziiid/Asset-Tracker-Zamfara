@@ -15,8 +15,27 @@ A comprehensive web application for monitoring and tracking national infrastruct
 - **Geographic Mapping**: Interactive maps with multiple style options (Streets, Satellite, Dark)
 - **Data Visualization**: Real-time dashboards and data tables
 - **User Management**: Secure user authentication and authorization
-- **Export Capabilities**: Export project data to Excel format
+- **Enhanced Data Export**: Complete data download in multiple formats (CSV, Excel, JSON)
 - **Responsive Design**: Mobile-friendly interface with Bootstrap components
+
+### Enhanced Data Export Features
+
+The application now provides comprehensive data export capabilities:
+
+#### Download Options
+1. **CSV Download** - Plain text format, compatible with Excel and other spreadsheet applications
+2. **Excel Download** - Native Excel format with professional formatting and auto-adjusted column widths
+3. **JSON Download** - Structured data format with metadata for programmatic use and API integration
+
+#### Features
+- **Complete Data Export**: Download the entire dataset, not just filtered/visible data
+- **Timestamped Files**: Each download includes a timestamp in the filename for easy organization
+- **Multiple Formats**: Choose the format that best suits your needs
+- **Metadata Included**: JSON exports include export metadata for tracking and validation
+- **Professional Formatting**: Excel exports include header styling and optimized column widths
+
+#### Original DataTable Export
+The existing DataTable export functionality remains available for exporting filtered, sorted, or paginated data views.
 
 ## Technology Stack
 
@@ -55,6 +74,27 @@ A comprehensive web application for monitoring and tracking national infrastruct
    ```bash
    python main.py
    ```
+
+## Usage
+
+### Basic Operations
+1. **Registration**: Create an account and verify your email
+2. **Login**: Access the dashboard with your credentials
+3. **Data Entry**: Use the enrollment form to add new infrastructure projects
+4. **Visualization**: View project data on the interactive map
+5. **Export**: Use the download buttons to export complete datasets in your preferred format
+
+### Data Export
+Navigate to the Records page to access the enhanced download functionality:
+
+1. **CSV Download**: Click the "Download CSV" button for plain text format compatible with Excel
+2. **Excel Download**: Click the "Download Excel" button for professionally formatted spreadsheets
+3. **JSON Download**: Click the "Download JSON" button for structured data with metadata
+
+Each download includes:
+- Complete dataset (not just filtered views)
+- Timestamp in filename for organization
+- All current project records with proper formatting
 
 ## Deployment & Environment Variables
 

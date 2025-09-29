@@ -12,6 +12,8 @@ import googlemaps
 from dash_app.redis_con import r, fetch_data, username, password, hostname, database, mapboxAPI, geocodeAPI
 from datetime import datetime
 import pytz
+import io
+import json
 
 
 
@@ -298,4 +300,111 @@ def register_callbacks(app):
         total_entries = len(data)
         str = f'Total Entries: {total_entries}'
         return data.to_dict('records'), str
+    
+    # Download callbacks for complete data export
+    @app.callback(
+        Output("download-csv", "data"),
+        Input("download-csv-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def download_csv(n_clicks):
+        if n_clicks:
+            # Fetch fresh data for download
+            data = fetch_data(r, username, password, hostname, database)
+            data.drop(columns=['id', 'asset_count'], inplace=True)
+            serial_no = pd.DataFrame([idx + 1 for idx in range(len(data))])
+            data.insert(0, 'S/N', serial_no)
+            data['date'] = data['date'].apply(lambda x: format_date(x))
+            data.columns = ['S/N', 'Name', 'Address', 'Project ID.', 'Latitude', 'Longitude', 'State', 'Date']
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"infrastructure_monitoring_data_{timestamp}.csv"
+            
+            return dict(content=data.to_csv(index=False), filename=filename)
+
+    @app.callback(
+        Output("download-excel", "data"),
+        Input("download-excel-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def download_excel(n_clicks):
+        if n_clicks:
+            # Fetch fresh data for download
+            data = fetch_data(r, username, password, hostname, database)
+            data.drop(columns=['id', 'asset_count'], inplace=True)
+            serial_no = pd.DataFrame([idx + 1 for idx in range(len(data))])
+            data.insert(0, 'S/N', serial_no)
+            data['date'] = data['date'].apply(lambda x: format_date(x))
+            data.columns = ['S/N', 'Name', 'Address', 'Project ID.', 'Latitude', 'Longitude', 'State', 'Date']
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"infrastructure_monitoring_data_{timestamp}.xlsx"
+            
+            # Create Excel file in memory
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                data.to_excel(writer, index=False, sheet_name='Infrastructure_Data')
+                
+                # Get the workbook and worksheet
+                workbook = writer.book
+                worksheet = writer.sheets['Infrastructure_Data']
+                
+                # Add some formatting
+                from openpyxl.styles import PatternFill, Font
+                header_fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+                header_font = Font(bold=True, color="FFFFFF")
+                
+                for cell in worksheet[1]:
+                    cell.fill = header_fill
+                    cell.font = header_font
+                    
+                # Auto-adjust column widths
+                for column in worksheet.columns:
+                    max_length = 0
+                    column_letter = column[0].column_letter
+                    for cell in column:
+                        try:
+                            if len(str(cell.value)) > max_length:
+                                max_length = len(str(cell.value))
+                        except:
+                            pass
+                    adjusted_width = min(max_length + 2, 50)
+                    worksheet.column_dimensions[column_letter].width = adjusted_width
+            
+            return dict(content=output.getvalue(), filename=filename, base64=False)
+
+    @app.callback(
+        Output("download-json", "data"),
+        Input("download-json-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def download_json(n_clicks):
+        if n_clicks:
+            # Fetch fresh data for download
+            data = fetch_data(r, username, password, hostname, database)
+            data.drop(columns=['id', 'asset_count'], inplace=True)
+            serial_no = pd.DataFrame([idx + 1 for idx in range(len(data))])
+            data.insert(0, 'S/N', serial_no)
+            data['date'] = data['date'].apply(lambda x: format_date(x))
+            data.columns = ['S/N', 'Name', 'Address', 'Project ID.', 'Latitude', 'Longitude', 'State', 'Date']
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"infrastructure_monitoring_data_{timestamp}.json"
+            
+            # Create structured JSON with metadata
+            json_data = {
+                "metadata": {
+                    "export_date": datetime.now().isoformat(),
+                    "total_records": len(data),
+                    "source": "National Infrastructure Monitoring System",
+                    "format_version": "1.0"
+                },
+                "data": data.to_dict('records')
+            }
+            
+            return dict(content=json.dumps(json_data, indent=2, default=str), filename=filename)
+
+    def format_date(str_date):
+        date = datetime.strptime(str_date, '%Y-%m-%d')
+        return date.strftime('%d-%m-%Y')
     
