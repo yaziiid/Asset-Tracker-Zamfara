@@ -47,6 +47,11 @@ updatemenus=[
         )
     ]
 
+# Helper function for date formatting
+def format_date(str_date):
+    date = datetime.strptime(str_date, '%Y-%m-%d')
+    return date.strftime('%d-%m-%Y')
+
 
 def register_callbacks(app):
 
@@ -292,9 +297,6 @@ def register_callbacks(app):
         data.drop(columns=['id', 'asset_count'], inplace=True)
         serial_no = pd.DataFrame([idx + 1 for idx in range(len(data))])
         data.insert(0, 'S/N', serial_no)
-        def format_date(str_date):
-            date = datetime.strptime(str_date, '%Y-%m-%d')
-            return date.strftime('%d-%m-%Y')
         data['date'] = data['date'].apply(lambda x: format_date(x))
         data.columns = ['S/N', 'Name', 'Address', 'Project ID.', 'Latitude', 'Longitude', 'State', 'Date']
         total_entries = len(data)
@@ -403,8 +405,4 @@ def register_callbacks(app):
             }
             
             return dict(content=json.dumps(json_data, indent=2, default=str), filename=filename)
-
-    def format_date(str_date):
-        date = datetime.strptime(str_date, '%Y-%m-%d')
-        return date.strftime('%d-%m-%Y')
     
