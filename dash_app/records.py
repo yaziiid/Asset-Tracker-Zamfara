@@ -1,4 +1,4 @@
-from dash import dash_table
+from dash import dash_table, html, dcc
 import dash_bootstrap_components as dbc
 import configparser
 import redis
@@ -6,6 +6,8 @@ import pandas as pd
 from sqlalchemy import engine_from_config
 from dash_app.redis_con import r, fetch_data, username, password, hostname, database
 from datetime import datetime
+import base64
+import io
 
 
 
@@ -22,7 +24,42 @@ data = data.drop("Phone No.", axis=1) #removed the phone number from the column
 columns=[{'name':i, 'id':i} for i in data.columns]
 total_entries = len(data)
 
-customer_records = dbc.Container(
+# Function to generate download data
+def generate_download_data(format_type='csv'):
+    """Generate data in specified format for download"""
+    if format_type == 'csv':
+        return data.to_csv(index=False, encoding='utf-8')
+    elif format_type == 'excel':
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            data.to_excel(writer, index=False, sheet_name='Asset_Tracker_Data')
+        return output.getvalue()
+    elif format_type == 'json':
+        return data.to_json(orient='records', indent=2)
+
+customer_records = dbc.Container([
+    # Download buttons section
+    dbc.Row([
+        dbc.Col([
+            html.H5("Download Complete Data", className="mb-3"),
+            dbc.ButtonGroup([
+                dbc.Button([
+                    html.I(className="fas fa-download me-2"),
+                    "Download CSV"
+                ], id="download-csv-btn", color="primary", outline=True, className="me-2"),
+                dbc.Button([
+                    html.I(className="fas fa-file-excel me-2"),
+                    "Download Excel"
+                ], id="download-excel-btn", color="success", outline=True, className="me-2"),
+                dbc.Button([
+                    html.I(className="fas fa-code me-2"),
+                    "Download JSON"
+                ], id="download-json-btn", color="info", outline=True)
+            ], className="mb-3")
+        ], width=12, className="text-center")
+    ]),
+    
+    # Data table section
     dbc.Row([
         dbc.Col([
             dbc.Badge(f'Total Entries: {total_entries}', class_name='Badge fs-6', id='badge'),
@@ -42,6 +79,7 @@ customer_records = dbc.Container(
                 page_current=0,
                 page_size=25,
                 export_format='xlsx',
+                export_headers='display',
                 style_cell_conditional=(
                     [
                         {
@@ -56,7 +94,13 @@ customer_records = dbc.Container(
                 ),
             ))
         ], class_name='col-xs-12 col-lg-10 shadow rounded')
-    ],class_name='justify-content-center align-items-center gx-1')
-, fluid=True)
+    ],class_name='justify-content-center align-items-center gx-1'),
+    
+    # Hidden download components
+    dcc.Download(id="download-csv"),
+    dcc.Download(id="download-excel"),
+    dcc.Download(id="download-json"),
+    
+], fluid=True)
 
 
