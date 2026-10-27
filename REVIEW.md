@@ -1,0 +1,39 @@
+# Review and migration notes
+
+## Original-code findings
+
+1. **Critical: secrets in a public repository.** `cloud_db.ini` and `mailconfig.ini` contain database, Redis, SMTP, signing and API credentials. Removed from the migrated branch and ignored for future commits. Deletion does not revoke secrets or remove Git history. Rotate/restrict them at the providers and use newly issued values where needed.
+2. **High: registration fails.** `legacy/dash_app/enrol.py` omits `form_phone`, but the enrollment callback requires a phone value and rejects empty input. Replaced with an optional, visible phone field and matching database validation.
+3. **High: login redirects fail.** `legacy/main.py` nests `url_for()` and attempts to resolve `'/'` as an endpoint. It also redirects to unchecked `next` input. Replaced with Firebase Auth and app-controlled navigation.
+4. **High: cross-session selection.** `legacy/dash_app/callbacks.py` saves `table_click` in a single global Redis key. One user can consume another user's selected record. Selection now stays in component state per browser session.
+5. **High: wrong record after filter/sort.** Original table selection uses a visible row offset into the original dataframe. Current selection uses stable Firestore document IDs.
+6. **High: numeric project assumptions.** Map search casts project/product IDs to integer and crashes on missing matches. New references remain strings; no-match searches display an empty state.
+7. **Medium: fragile startup and stale records.** Database reads occur at Python module import; cache updates inconsistently set expiration. New app starts without backend record reads, handles database errors and supports bounded refresh/pagination.
+8. **Medium: registration form clears even on failure.** Separate callback clears input on any submit click. New form clears only after a confirmed write.
+9. **Medium: inconsistent column names.** Initial table labels use Project while refresh callback uses Product ID and returns a hidden phone column. New schema uses one consistent project field.
+10. **Maintenance: old Python dependency pins and Heroku runtime.** Replaced the execution path with a locked Node/React build and Netlify configuration. Legacy dependencies are not installed or deployed.
+
+## Access and data model
+
+`members/UID`: one validated `role` field. Only a verified, bootstrapped administrator can grant/update another UID's role. Users cannot grant themselves access, change their own role or list memberships. Verified users may read their own membership status.
+
+`records/ID`: name, address, optional phone, project reference, state, coordinates, integer asset count, ISO date string, server creation timestamp and creator UID. Verified approved viewers can read; editors/admins can create valid records. Client updates/deletes are denied. Administrators may use trusted tools for corrections and legacy import.
+
+The shared project register is intentionally available to approved team members. It does not contain authentication passwords, tokens, private keys or user account profiles. Access approval should be limited to staff authorised to see project/client contact details.
+
+## Security validation design
+
+Emulator tests cover anonymous/unverified/unapproved access, the exact register query, viewer write denial, editor/admin create, spoofed author/timestamp, invalid coordinates/counts/types, extra fields, role escalation and record update/delete denial. Registration bounds all text lengths and numbers. CSV values are escaped and formula-prefixed text is neutralised. Popup content uses DOM text nodes.
+
+## Remaining operational work
+
+Actual Firebase provisioning, deployed rules, verified administrator bootstrap, Netlify environment configuration, live smoke tests and any old-data import must be confirmed separately. The original database data is not stored in this Git repository. Existing accounts are not automatically transferred. Rotate exposed credentials before reusing the old services or keys. A new restricted geocoding key is optional; manual coordinates need no Google API key.
+
+## Verified implementation status (27 October 2026)
+
+- New Firebase project: `zamfara-asset-tracker-2026`; Standard `(default)` Firestore database in `africa-south1`, free tier enabled.
+- Firestore rules compiled and deployed; email/password Auth enabled.
+- 11 application/API tests and 7 Firestore emulator tests passed.
+- Real-config production build passed; dependency audit reported zero known vulnerabilities.
+- Local emulator UI verified sign-in, project registration with an optional blank phone, persisted records and filtered table-to-map selection. Test fixtures were kept out of production.
+- Default-deny attack review: public collection listing, unapproved/unverified access, arbitrary paths, orphan subcollections, spoofed creator/timestamp, invalid types/bounds, missing/extra fields, oversized strings, self-role escalation and client record updates/deletes were denied in emulator tests. No status transitions or replay-sensitive counters exist in this append-only model. Membership documents contain only a role; personal Auth profiles are not shared.
