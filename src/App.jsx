@@ -51,6 +51,7 @@ import {
   setDoc,
   startAfter,
 } from "firebase/firestore";
+import { createVerificationSender } from "./verification.mjs";
 import { PartnerLogos, ProgrammePage } from "./Programme.jsx";
 import { auth, configured, db } from "./firebase.js";
 import {
@@ -119,7 +120,7 @@ function Notice({ children, error = false }) {
     </div>
   ) : null;
 }
-function AuthPage() {
+function AuthPage({ requestVerification }) {
   const [mode, setMode] = useState("login"),
     [busy, setBusy] = useState(false),
     [status, setStatus] = useState(""),
@@ -153,7 +154,7 @@ function AuthPage() {
           await updateProfile(result.user, {
             displayName: String(f.get("name")).trim(),
           });
-          await sendEmailVerification(result.user);
+          await requestVerification(result.user);
         } else
           await signInWithEmailAndPassword(
             auth,
@@ -350,17 +351,31 @@ function AuthPage() {
     </main>
   );
 }
-function AccessPage({ user, verified }) {
+function AccessPage({
+  user,
+  verified,
+  verification,
+  retryAt,
+  requestVerification,
+}) {
   const [status, setStatus] = useState(""),
     [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [clock, setClock] = useState(Date.now());
+  const emailState = verification?.uid === user.uid ? verification : {};
+  const remaining = Math.max(0, Math.ceil((retryAt - clock) / 1000));
+  useEffect(() => {
+    if (verified || !retryAt || retryAt <= Date.now()) return;
+    const timer = setInterval(() => setClock(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [verified, retryAt]);
   async function action(kind) {
     setBusy(true);
     setError("");
     try {
       if (kind === "send") {
-        await sendEmailVerification(user);
-        setStatus("Verification email sent. Check your inbox and spam folder.");
+        setClock(Date.now());
+        await requestVerification(user);
       } else {
         await user.reload();
         await user.getIdToken(true);
@@ -383,10 +398,10 @@ function AccessPage({ user, verified }) {
         <p>
           {verified
             ? "An administrator needs to give your account access before you can view recipients or register stove deliveries."
-            : `Open the verification link sent to ${user.email}, then check your status below.`}
+            : `Verify ${user.email} by opening the link in your verification email. If it has not arrived, request one below and check your inbox and spam folder.`}
         </p>
-        <Notice error>{error}</Notice>
-        <Notice>{status}</Notice>
+        <Notice error>{error || emailState.error}</Notice>
+        <Notice>{status || emailState.status}</Notice>
         {verified && (
           <label>
             Your account ID<code className="uid">{user.uid}</code>
@@ -404,10 +419,14 @@ function AccessPage({ user, verified }) {
           {!verified && (
             <button
               className="secondary"
-              disabled={busy}
+              disabled={busy || emailState.busy || remaining > 0}
               onClick={() => action("send")}
             >
-              Resend email
+              {emailState.busy
+                ? "Requesting email…"
+                : remaining > 0
+                  ? `Resend in ${remaining}s`
+                  : "Resend email"}
             </button>
           )}
           <button className="text-button" onClick={() => signOut(auth)}>
@@ -770,6 +789,9 @@ function Workspace({ user, role }) {
     <div className="workspace">
       <aside className="sidebar">
         <Brand compact />
+        <div className="sidebar-partners">
+          <PartnerLogos compact />
+        </div>
         <div className="workspace-label">YOUR WORKSPACE</div>
         <nav>
           {nav.map(([id, Icon, name]) => (
@@ -855,8 +877,8 @@ function Workspace({ user, role }) {
                     : page === "programme"
                       ? "Explore the stoves, the purpose and the partnership."
                       : page === "team"
-                      ? "Manage who can use your programme workspace."
-                      : "Register Save80 stoves and the households they are delivered to."}
+                        ? "Manage who can use your programme workspace."
+                        : "Register Save80 stoves and the households they are delivered to."}
               </p>
             </div>
             {canWrite && !["register", "team", "programme"].includes(page) && (
@@ -891,9 +913,13 @@ function Workspace({ user, role }) {
                   </div>
                   <strong>
                     {new Set(
-                      records.map((record) =>
-                        String(record.state ?? "").trim().toLocaleLowerCase(),
-                      ).filter(Boolean),
+                      records
+                        .map((record) =>
+                          String(record.state ?? "")
+                            .trim()
+                            .toLocaleLowerCase(),
+                        )
+                        .filter(Boolean),
                     ).size.toLocaleString()}
                   </strong>
                   <span>Where registered stoves are located</span>
@@ -1165,7 +1191,16 @@ function Workspace({ user, role }) {
 export default function App() {
   const [user, setUser] = useState(undefined),
     [member, setMember] = useState(undefined),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [verification, setVerification] = useState(null);
+  const [verificationSender] = useState(() =>
+    createVerificationSender({
+      deliver: (account) =>
+        sendEmailVerification(account, { url: window.location.origin + "/" }),
+      storage: window.sessionStorage,
+      onChange: setVerification,
+    }),
+  );
   useEffect(() => {
     if (!configured) return;
     return onAuthStateChanged(auth, (next) => {
@@ -1207,7 +1242,7 @@ export default function App() {
         <p>Opening your workspace…</p>
       </main>
     );
-  if (!user) return <AuthPage />;
+  if (!user) return <AuthPage requestVerification={verificationSender.send} />;
   if (
     !user.emailVerified ||
     !["admin", "editor", "viewer"].includes(member?.role)
@@ -1215,7 +1250,17 @@ export default function App() {
     return (
       <>
         <Notice error>{error}</Notice>
-        <AccessPage user={user} verified={user.emailVerified} />
+        <AccessPage
+          user={user}
+          verified={user.emailVerified}
+          verification={verification}
+          retryAt={
+            verification?.uid === user.uid
+              ? verification.retryAt
+              : verificationSender.retryAt(user.uid)
+          }
+          requestVerification={verificationSender.send}
+        />
       </>
     );
   return <Workspace key={user.uid} user={user} role={member.role} />;

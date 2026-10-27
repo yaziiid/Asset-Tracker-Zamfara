@@ -44,4 +44,13 @@ The app now represents the TBCN–atmosfair Save80 programme across states and r
 
 Each new record represents one physical stove. The exact printed Product ID is preserved as text in `project`, with `assetCount` fixed to 1. Record document IDs use a SHA-256 digest of that Product ID. Firestore validates the digest (normalising its hexadecimal representation to lowercase) and denies overwrites, arbitrary document IDs and concurrent duplicate registration. The deferred importer uses the same identity and refuses grouped counts or duplicate Product IDs for reconciliation before any import.
 
-Validation: 12 application/API tests and 9 Firestore emulator tests pass, including simultaneous duplicate registration, role controls, schema bounds and immutable records. Local UI checks cover multi-state mapping and duplicate-ID feedback. Production build passes. No original MySQL records were accessed, changed or imported during this update. First verified administrator setup remains pending the owner's account confirmation.
+Validation: 12 application/API tests and 9 Firestore emulator tests pass, including simultaneous duplicate registration, role controls, schema bounds and immutable records. Local UI checks cover multi-state mapping and duplicate-ID feedback. Production build passes. No original MySQL records were accessed, changed or imported during this update. The first owner account is now verified and has been bootstrapped as administrator.
+
+
+## Verification delivery and sidebar update
+
+Firebase accepted a controlled verification resend and the owner confirmed email verification. The initial administrator membership was then created after checking the account was verified, enabled and no other administrator existed. Production stove records remain empty and no historical data was imported.
+
+Signup email delivery results now live above the signup screen, preventing Auth navigation from hiding a send failure. Resend requests have a 60-second cooldown stored for the current browser session; Firebase throttling produces a longer five-minute retry delay and explains that backend limits can last longer. Failed requests are never labelled successful. Tests cover delayed failure after navigation, concurrent clicks, cooldown persistence after reload and backend throttling. The local Auth emulator UI confirmed successful resend feedback and a disabled timer after refresh.
+
+Both partner logos now appear beneath Save80 branding in the authenticated navigation. Validation: 15 application/API/delivery tests pass and the production build passes; the 9 existing rules tests are unchanged.

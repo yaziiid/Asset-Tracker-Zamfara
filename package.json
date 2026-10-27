@@ -11,7 +11,7 @@
     "build": "node scripts/check-config.mjs && vite build",
     "build:check": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --test tests/domain.test.mjs tests/geocode.test.mjs",
+    "test": "node --test tests/domain.test.mjs tests/geocode.test.mjs tests/verification.test.mjs",
     "test:rules": "npx -y firebase-tools@latest emulators:exec --project demo-zamfara --only firestore 'node --test tests/rules.test.mjs'",
     "import:records": "node scripts/import-records.mjs"
   },

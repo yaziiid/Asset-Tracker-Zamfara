@@ -1325,6 +1325,42 @@ td strong {
   height: 41px !important;
   object-fit: contain;
 }
+.sidebar-partners {
+  margin-top: 24px;
+}
+.sidebar .partner-lockup-compact {
+  width: 100%;
+  padding: 8px;
+  gap: 7px;
+  justify-content: space-between;
+}
+.sidebar .tbcn-partner {
+  gap: 4px;
+}
+.sidebar .tbcn-partner > img {
+  width: 28px !important;
+  height: 24px !important;
+}
+.sidebar .tbcn-partner > strong {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+.sidebar .partner-lockup > .atmosfair-partner {
+  width: 88px !important;
+  height: 34px !important;
+}
+.sidebar .workspace-label {
+  margin-top: 24px;
+}
+.sidebar {
+  overflow-y: auto;
+}
+@media (max-width: 850px) {
+  .sidebar-partners {
+    margin: 0 0 16px;
+    max-width: 220px;
+  }
+}
 .auth-form-wrap {
   background: #fafbf6;
   padding: 45px 55px 25px;

@@ -4,7 +4,7 @@ A Netlify frontend backed by Firebase Authentication and Cloud Firestore Standar
 
 ## Features
 
-- Email/password accounts, verification email, password reset and explicit session/remember-me choice.
+- Email/password accounts, verification email with persistent delivery feedback and a resend cooldown, password reset and explicit session/remember-me choice.
 - Administrator-approved team access: viewer, editor and administrator.
 - Individual Save80 stove registration, optional phone, string Product IDs, recipient households and validated coordinates.
 - Interactive location map, text/state filters, sorting, stable record selection, paginated records and CSV export with formula injection protection.
@@ -71,3 +71,5 @@ The user-facing app is generalised for the TBCN–atmosfair Save80 collaboration
 The Save80 programme page uses product background and a credited stove photograph from Oliver Adria's September 2014 bigEE/Wuppertal technology guide supplied by the user. Product background is not a measured programme result. Dashboard counts do not imply certified carbon credits or quantified emission savings. Partner logos reuse the established project assets.
 
 Existing data migration is deferred at the user's request. No original database records have been changed or imported. Historical resource IDs and repository names may retain Zamfara internally; they do not restrict programme locations.
+
+Partner logos are displayed beneath the Save80 brand in the authenticated navigation panel as well as on the public programme pages.
