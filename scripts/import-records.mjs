@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { legacyRecord } from "../src/domain.mjs";
+import { legacyRecord, productDocumentId } from "../src/domain.mjs";
 // Dry run is the default. The Admin SDK is loaded only for an explicit write.
 const args = process.argv.slice(2),
   input = args.find((x) => !x.startsWith("--"));
@@ -12,19 +12,20 @@ const rows = JSON.parse(await readFile(input, "utf8"));
 if (!Array.isArray(rows))
   throw new Error("Input must be an array of exported MySQL customer rows.");
 const seen = new Set();
-const prepared = rows.map((row, index) => {
-  const id = String(row.id ?? "");
-  if (!/^[A-Za-z0-9_-]{1,100}$/.test(id) || seen.has(id))
-    throw new Error(
-      `Row ${index + 1}: missing, invalid or duplicate legacy id.`,
-    );
-  seen.add(id);
+const prepared = [];
+for (const [index, row] of rows.entries()) {
   try {
-    return { id: `legacy-${id}`, data: legacyRecord(row) };
+    const data = legacyRecord(row);
+    if (data.assetCount !== 1)
+      throw new Error("Each stove needs its own Product ID. Reconcile grouped legacy rows before importing.");
+    const id = await productDocumentId(data.project);
+    if (seen.has(id)) throw new Error("Duplicate Product ID in the export.");
+    seen.add(id);
+    prepared.push({ id, data });
   } catch (error) {
     throw new Error(`Row ${index + 1}: ${error.message}`);
   }
-});
+}
 console.log(
   `Validated ${prepared.length} records for project ${projectId}. No private record values are logged.`,
 );

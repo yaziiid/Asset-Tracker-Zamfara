@@ -4,6 +4,7 @@ import {
   assertFails,
   assertSucceeds,
 } from "@firebase/rules-unit-testing";
+import { productDocumentId } from "../src/domain.mjs";
 import { readFile } from "node:fs/promises";
 import {
   doc,
@@ -42,6 +43,7 @@ beforeEach(async () => {
 });
 const db = (uid, verified = true) =>
   env.authenticatedContext(uid, { email_verified: verified }).firestore();
+const productKey = await productDocumentId("0001");
 const record = (uid) => ({
   name: "Council",
   address: "Gusau, Zamfara",
@@ -75,12 +77,12 @@ test("approved roles can read paginated register; only editors and admins create
         ),
       ),
     );
-    const write = setDoc(doc(db(role), "records", "new"), record(role));
+    const write = setDoc(doc(db(role), "records", productKey), record(role));
     if (role === "viewer") await assertFails(write);
     else await assertSucceeds(write);
     // use a different document for the next role
     await env.withSecurityRulesDisabled((ctx) =>
-      deleteDoc(doc(ctx.firestore(), "records", "new")),
+      deleteDoc(doc(ctx.firestore(), "records", productKey)),
     );
   }
 });
@@ -97,7 +99,7 @@ test("clients cannot spoof creator or timestamp, store arbitrary fields, or inva
     { secret: "extra" },
   ])
     await assertFails(
-      setDoc(doc(db("editor"), "records", "bad"), {
+      setDoc(doc(db("editor"), "records", productKey), {
         ...record("editor"),
         ...changes,
       }),
@@ -150,7 +152,7 @@ test("required omissions, oversized text and arbitrary role changes fail", async
   for (const key of Object.keys(record("editor"))) {
     const r = record("editor");
     delete r[key];
-    await assertFails(setDoc(doc(db("editor"), "records", "missing"), r));
+    await assertFails(setDoc(doc(db("editor"), "records", productKey), r));
   }
   for (const key of [
     "name",
@@ -161,7 +163,7 @@ test("required omissions, oversized text and arbitrary role changes fail", async
     "createdBy",
   ])
     await assertFails(
-      setDoc(doc(db("editor"), "records", "large"), {
+      setDoc(doc(db("editor"), "records", productKey), {
         ...record("editor"),
         [key]: "x".repeat(10000),
       }),
@@ -175,6 +177,25 @@ test("required omissions, oversized text and arbitrary role changes fail", async
       createdAt: new Date(),
       name: "x".repeat(10000),
       extra: true,
+    }),
+  );
+});
+test("a Product ID can only be created once, including under simultaneous registrations", async () => {
+  const results = await Promise.allSettled([
+    setDoc(doc(db("editor"), "records", productKey), record("editor")),
+    setDoc(doc(db("admin"), "records", productKey), record("admin")),
+  ]);
+  if (results.filter((result) => result.status === "fulfilled").length !== 1)
+    throw new Error("Exactly one duplicate registration must succeed.");
+  await assertFails(
+    setDoc(doc(db("editor"), "records", "different-id"), record("editor")),
+  );
+});
+test("new stove registrations cannot group multiple stoves behind one Product ID", async () => {
+  await assertFails(
+    setDoc(doc(db("editor"), "records", productKey), {
+      ...record("editor"),
+      assetCount: 2,
     }),
   );
 });

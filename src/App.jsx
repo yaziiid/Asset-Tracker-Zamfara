@@ -22,6 +22,9 @@ import {
   Users,
   Package,
   RefreshCw,
+  Leaf,
+  TreePine,
+  BookOpen,
 } from "lucide-react";
 import {
   browserLocalPersistence,
@@ -36,7 +39,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import {
-  addDoc,
+  runTransaction,
   collection,
   doc,
   getDocs,
@@ -48,8 +51,14 @@ import {
   setDoc,
   startAfter,
 } from "firebase/firestore";
+import { PartnerLogos, ProgrammePage } from "./Programme.jsx";
 import { auth, configured, db } from "./firebase.js";
-import { filterRecords, normalizeRecord, recordsToCsv } from "./domain.mjs";
+import {
+  filterRecords,
+  normalizeRecord,
+  recordsToCsv,
+  productDocumentId,
+} from "./domain.mjs";
 const AssetMap = lazy(() => import("./AssetMap.jsx"));
 const PAGE_SIZE = 250;
 const blank = {
@@ -57,7 +66,7 @@ const blank = {
   address: "",
   phone: "",
   project: "",
-  state: "Zamfara",
+  state: "",
   latitude: "",
   longitude: "",
   assetCount: 1,
@@ -89,11 +98,13 @@ function Brand({ compact = false }) {
   return (
     <div className={`brand ${compact ? "compact" : ""}`}>
       <div className="brand-symbol">
-        <MapPinned size={25} strokeWidth={1.7} />
+        <Leaf size={25} strokeWidth={1.7} />
       </div>
       <div>
-        <strong>ZAMFARA</strong>
-        <span>ASSET TRACKER</span>
+        <strong>
+          Save80<span className="brand-dot">.</span>
+        </strong>
+        <span>STOVE TRACKER</span>
       </div>
     </div>
   );
@@ -156,40 +167,66 @@ function AuthPage() {
       setBusy(false);
     }
   }
+  if (mode === "about")
+    return (
+      <main className="programme-public">
+        <ProgrammePage onBack={() => setMode("login")} />
+      </main>
+    );
   return (
     <main className="auth-layout">
       <section className="auth-story">
         <Brand />
         <div className="story-content">
-          <span className="eyebrow light">INFRASTRUCTURE INTELLIGENCE</span>
+          <span className="eyebrow light">
+            <Leaf size={13} /> FUEL-EFFICIENT COOKING. SHARED PROGRESS.
+          </span>
           <h1>
-            A clearer view.
-            <br />A stronger
+            Less firewood.
             <br />
-            <em>Zamfara.</em>
+            <em>More possibility.</em>
           </h1>
           <p>
-            One place to register, locate and monitor the projects and assets
-            that move our state forward.
+            Connecting Save80 stoves with the households and communities they
+            serve. A clearer view of every delivery, wherever the programme
+            grows.
           </p>
-          <div className="story-rule" />
-          <div className="story-caption">
-            <MapPin size={17} /> Zamfara State, Nigeria{" "}
-            <span>12.16° N · 6.66° E</span>
+          <div className="story-tags">
+            <span>
+              <TreePine size={15} />
+              Lower fuel demand
+            </span>
+            <span>
+              <Users size={15} />
+              Stronger communities
+            </span>
           </div>
         </div>
+        <figure className="stove-feature">
+          <img
+            src="/save80-stove.jpg"
+            alt="Save80 stove with a cooking pot, fuelled by small sticks of wood"
+          />
+          <figcaption>
+            <span>SAVE80 IN PRACTICE</span>
+            <strong>
+              Thoughtful design.
+              <br />
+              Everyday cooking.
+            </strong>
+            <small>
+              Fuel-efficient stoves for households that cook with firewood.
+            </small>
+          </figcaption>
+        </figure>
         <div className="auth-partners">
-          <img src="/coat-of-arms.png" alt="Nigeria coat of arms" />
-          <span>
-            National Infrastructure
-            <br />
-            Monitoring System
-          </span>
+          <span className="partner-eyebrow">A SHARED COMMITMENT</span>
+          <PartnerLogos />
         </div>
       </section>
       <section className="auth-form-wrap">
         <div className="auth-form">
-          <span className="eyebrow">ZAMFARA ASSET TRACKER</span>
+          <span className="eyebrow">SAVE80 STOVE TRACKER</span>
           <h2>
             {mode === "login"
               ? "Welcome back."
@@ -199,7 +236,7 @@ function AuthPage() {
           </h2>
           <p className="muted">
             {mode === "login"
-              ? "Sign in to your infrastructure workspace."
+              ? "Sign in to your Save80 programme workspace."
               : mode === "signup"
                 ? "Verify your email, then request access from an administrator."
                 : "We’ll send a secure reset link to your email."}
@@ -293,13 +330,21 @@ function AuthPage() {
               {mode === "login" ? "Create an account" : "Sign in"}
             </button>
           </p>
+          <button
+            className="text-button learn-save80"
+            onClick={() => setMode("about")}
+          >
+            <Leaf size={15} />
+            About Save80 &amp; the programme
+            <ArrowUpRight size={14} />
+          </button>
           <div className="secure-note">
-            <ShieldCheck size={17} /> Secure access for authorised project teams
+            <ShieldCheck size={17} /> Secure access for authorised programme
+            teams
           </div>
         </div>
         <footer>
-          National Infrastructure Monitoring System{" "}
-          <span>© {new Date().getFullYear()}</span>
+          Save80 · TBCN × atmosfair <span>© {new Date().getFullYear()}</span>
         </footer>
       </section>
     </main>
@@ -337,7 +382,7 @@ function AccessPage({ user, verified }) {
         </h1>
         <p>
           {verified
-            ? "An administrator needs to give your account access before you can view or register assets."
+            ? "An administrator needs to give your account access before you can view recipients or register stove deliveries."
             : `Open the verification link sent to ${user.email}, then check your status below.`}
         </p>
         <Notice error>{error}</Notice>
@@ -429,13 +474,25 @@ function EnrolForm({ user, onSaved }) {
     setStatus("");
     try {
       const record = normalizeRecord(form);
-      await addDoc(collection(db, "records"), {
-        ...record,
-        createdAt: serverTimestamp(),
-        createdBy: user.uid,
+      const reference = doc(
+        db,
+        "records",
+        await productDocumentId(record.project),
+      );
+      await runTransaction(db, async (transaction) => {
+        if ((await transaction.get(reference)).exists())
+          throw new Error(
+            "This Product ID is already registered. Check the stove register before trying again.",
+          );
+        transaction.set(reference, {
+          ...record,
+          assetCount: 1,
+          createdAt: serverTimestamp(),
+          createdBy: user.uid,
+        });
       });
       setForm({ ...blank });
-      setStatus("Asset registered successfully.");
+      setStatus("Save80 stove registered successfully.");
       await onSaved();
     } catch (e) {
       setError(message(e));
@@ -446,20 +503,13 @@ function EnrolForm({ user, onSaved }) {
   const fields = [
     [
       "name",
-      "Client / organisation name",
-      "e.g. Gusau Municipal Council",
+      "Recipient / household name",
+      "Enter the recipient’s full name",
       "text",
       true,
       120,
     ],
-    [
-      "project",
-      "Project / asset reference",
-      "e.g. Borehole rehabilitation – 001",
-      "text",
-      true,
-      120,
-    ],
+    ["project", "Product ID", "e.g. S80-00042", "text", true, 120],
     [
       "phone",
       "Phone number (optional)",
@@ -468,17 +518,18 @@ function EnrolForm({ user, onSaved }) {
       false,
       30,
     ],
-    ["state", "State", "Zamfara", "text", true, 80],
-    ["assetCount", "Number of assets", "1", "number", true],
+    ["state", "State / region", "Enter state or region", "text", true, 80],
   ];
   return (
     <div className="form-panel">
       <div className="panel-heading">
         <div>
-          <span className="eyebrow">EXPAND THE REGISTER</span>
-          <h2>Register an asset</h2>
+          <span className="eyebrow">REACH ANOTHER HOUSEHOLD</span>
+          <h2>Register a Save80 stove</h2>
           <p className="muted">
-            Add a project and its location to the monitoring system.
+            Enter the Product ID printed on one stove, then link it to the
+            recipient and delivery location. Register each additional stove
+            separately.
           </p>
         </div>
         <div className="round-icon">
@@ -509,7 +560,7 @@ function EnrolForm({ user, onSaved }) {
           )}
         </div>
         <label>
-          Full project address
+          Household / delivery address
           <textarea
             name="address"
             value={form.address}
@@ -517,12 +568,12 @@ function EnrolForm({ user, onSaved }) {
             required
             minLength={5}
             maxLength={500}
-            placeholder="Street / community, LGA, state and country"
+            placeholder="Community, district / LGA, state or region, and country"
             rows={3}
           />
         </label>
         <div className="coordinate-heading">
-          <h3>Project location</h3>
+          <h3>Delivery location</h3>
           <button
             type="button"
             className="secondary small"
@@ -548,7 +599,7 @@ function EnrolForm({ user, onSaved }) {
               max="90"
               value={form.latitude}
               onChange={update}
-              placeholder="12.16"
+              placeholder="e.g. 9.08"
               required
             />
           </label>
@@ -562,7 +613,7 @@ function EnrolForm({ user, onSaved }) {
               max="180"
               value={form.longitude}
               onChange={update}
-              placeholder="6.66"
+              placeholder="e.g. 7.40"
               required
             />
           </label>
@@ -570,7 +621,7 @@ function EnrolForm({ user, onSaved }) {
         <div className="form-submit">
           <span>All required fields must be completed.</span>
           <button className="primary" disabled={busy || finding}>
-            {busy ? "Saving…" : "Register asset"}
+            {busy ? "Saving…" : "Register stove"}
             <ArrowUpRight size={17} />
           </button>
         </div>
@@ -629,7 +680,9 @@ function AccessManager({ user }) {
           Access level
           <select value={role} onChange={(e) => setRole(e.target.value)}>
             <option value="viewer">Viewer — view and export records</option>
-            <option value="editor">Editor — also register assets</option>
+            <option value="editor">
+              Editor — also register stove deliveries
+            </option>
             <option value="admin">
               Administrator — also manage team access
             </option>
@@ -697,8 +750,9 @@ function Workspace({ user, role }) {
   const active = records.find((r) => r.id === selected);
   const nav = [
     ["overview", LayoutDashboard, "Overview"],
-    ["records", ClipboardList, "Asset register"],
-    ...(canWrite ? [["register", Plus, "Register asset"]] : []),
+    ["records", ClipboardList, "Stove register"],
+    ...(canWrite ? [["register", Plus, "Register stove"]] : []),
+    ["programme", BookOpen, "About Save80"],
     ...(role === "admin" ? [["team", Users, "Team access"]] : []),
   ];
   function exportCsv() {
@@ -708,7 +762,7 @@ function Workspace({ user, role }) {
       url = URL.createObjectURL(blob),
       a = document.createElement("a");
     a.href = url;
-    a.download = `zamfara-assets-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `save80-deliveries-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -736,12 +790,13 @@ function Workspace({ user, role }) {
         </nav>
         <div className="sidebar-bottom">
           <div className="state-card">
-            <img src="/coat-of-arms.png" alt="Nigeria coat of arms" />
-            <span>
-              National Infrastructure
+            <span>TBCN × atmosfair</span>
+            <small>
+              One programme.
               <br />
-              Monitoring System
-            </span>
+              Many communities.
+            </small>
+            <Leaf size={23} />
           </div>
           <div className="profile">
             <div className="avatar">
@@ -766,44 +821,48 @@ function Workspace({ user, role }) {
       <div className="main-workspace">
         <header className="topbar">
           <span>
-            Monitoring portal{" "}
+            Programme portal{" "}
             <span className="breadcrumb">
               / {nav.find((n) => n[0] === page)?.[2]}
             </span>
           </span>
           <span className="state-badge">
-            <span /> Zamfara State
+            <Leaf size={12} /> Across communities
           </span>
         </header>
         <main className="content">
           <div className="page-heading">
             <div>
               <span className="eyebrow">
-                NATIONAL INFRASTRUCTURE MONITORING SYSTEM
+                TBCN × ATMOSFAIR · SAVE80 PROGRAMME
               </span>
               <h1>
                 {page === "overview"
-                  ? "Infrastructure, in focus."
+                  ? "Every stove, a household."
                   : page === "records"
-                    ? "The asset register."
-                    : page === "team"
-                      ? "A connected team."
-                      : "Every asset counts."}
+                    ? "The Save80 register."
+                    : page === "programme"
+                      ? "Cooking with purpose."
+                      : page === "team"
+                        ? "A connected team."
+                        : "A new delivery. A lasting connection."}
               </h1>
               <p className="muted">
                 {page === "overview"
-                  ? "Track projects. Connect locations. See the bigger picture."
+                  ? "Follow stove deliveries and household reach across communities."
                   : page === "records"
-                    ? "Browse, search and export your registered infrastructure."
-                    : page === "team"
-                      ? "Manage who can use your infrastructure workspace."
-                      : "Build a reliable picture of infrastructure across the state."}
+                    ? "Find recipients, Product IDs and locations across the programme."
+                    : page === "programme"
+                      ? "Explore the stoves, the purpose and the partnership."
+                      : page === "team"
+                      ? "Manage who can use your programme workspace."
+                      : "Register Save80 stoves and the households they are delivered to."}
               </p>
             </div>
-            {canWrite && !["register", "team"].includes(page) && (
+            {canWrite && !["register", "team", "programme"].includes(page) && (
               <button className="primary" onClick={() => setPage("register")}>
                 <Plus size={18} />
-                Register asset
+                Register stove
               </button>
             )}
           </div>
@@ -812,7 +871,7 @@ function Workspace({ user, role }) {
               <div className="stats">
                 <article>
                   <div className="stat-label">
-                    REGISTERED RECORDS
+                    SAVE80 STOVES REGISTERED
                     <Package size={18} />
                   </div>
                   <strong>
@@ -822,24 +881,26 @@ function Workspace({ user, role }) {
                   <span>
                     {more
                       ? "Loaded records · more available"
-                      : "Records in the register"}
+                      : "Individual stove records"}
                   </span>
                 </article>
                 <article>
                   <div className="stat-label">
-                    ASSETS MONITORED
+                    STATES / REGIONS
                     <ClipboardList size={18} />
                   </div>
                   <strong>
-                    {records
-                      .reduce((sum, r) => sum + (r.assetCount || 0), 0)
-                      .toLocaleString()}
+                    {new Set(
+                      records.map((record) =>
+                        String(record.state ?? "").trim().toLocaleLowerCase(),
+                      ).filter(Boolean),
+                    ).size.toLocaleString()}
                   </strong>
-                  <span>Across loaded project records</span>
+                  <span>Where registered stoves are located</span>
                 </article>
                 <article>
                   <div className="stat-label">
-                    LOCATIONS MAPPED
+                    DELIVERIES MAPPED
                     <MapPin size={18} />
                   </div>
                   <strong>
@@ -851,7 +912,7 @@ function Workspace({ user, role }) {
                       )
                       .length.toLocaleString()}
                   </strong>
-                  <span>Projects with coordinates</span>
+                  <span>Delivery records with coordinates</span>
                 </article>
               </div>
               <Notice error>{error}</Notice>
@@ -860,14 +921,14 @@ function Workspace({ user, role }) {
                   <div>
                     <h2>
                       {page === "overview"
-                        ? "Project locations"
-                        : "Registered assets"}
+                        ? "Delivery locations"
+                        : "Stove deliveries"}
                       <span className="count">{filtered.length}</span>
                     </h2>
                     <p className="muted small-text">
                       {more
                         ? "Search and totals cover loaded records. Load more to include older entries."
-                        : "Your infrastructure register, connected to place."}
+                        : "From a Product ID to the household it serves."}
                     </p>
                   </div>
                   <div className="button-row">
@@ -893,32 +954,32 @@ function Workspace({ user, role }) {
                   <div className="search-input">
                     <Search size={17} />
                     <input
-                      aria-label="Search assets"
+                      aria-label="Search recipients and stoves"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Search project, client or address…"
+                      placeholder="Search recipient, Product ID or address…"
                     />
                   </div>
                   <select
-                    aria-label="Filter by state"
+                    aria-label="Filter by state or region"
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                   >
-                    <option value="">All states</option>
-                    {[...new Set(records.map((r) => r.state))]
+                    <option value="">All states / regions</option>
+                    {[...new Set(records.map((r) => r.state).filter(Boolean))]
                       .sort()
                       .map((s) => (
                         <option key={s}>{s}</option>
                       ))}
                   </select>
                   <select
-                    aria-label="Sort assets"
+                    aria-label="Sort deliveries"
                     value={sort}
                     onChange={(e) => setSort(e.target.value)}
                   >
                     <option value="newest">Newest first</option>
-                    <option value="name">Client A–Z</option>
-                    <option value="project">Project A–Z</option>
+                    <option value="name">Recipient A–Z</option>
+                    <option value="project">Product ID A–Z</option>
                   </select>
                 </div>
                 {loading && !records.length ? (
@@ -943,24 +1004,24 @@ function Workspace({ user, role }) {
                           <MapPinned size={25} />
                           <strong>
                             {records.length
-                              ? "No matching assets"
+                              ? "No matching deliveries"
                               : error
                                 ? "Records could not be loaded"
                                 : "Your map starts here"}
                           </strong>
                           <span>
                             {records.length
-                              ? "Try a different search or state."
+                              ? "Try a different search or region."
                               : error
                                 ? "Use Refresh to try again."
-                                : "Register your first asset to put it on the map."}
+                                : "Register your first stove delivery to put a household on the map."}
                           </span>
                         </div>
                       )}
                       <div className="map-key">
                         <span />
-                        Registered project <span className="gold" />
-                        Selected project
+                        Registered household <span className="gold" />
+                        Selected household
                       </div>
                     </div>
                     {active && (
@@ -985,10 +1046,10 @@ function Workspace({ user, role }) {
                       <table>
                         <thead>
                           <tr>
-                            <th>Project / reference</th>
-                            <th>Client</th>
+                            <th>Product ID</th>
+                            <th>Recipient</th>
                             <th>Location</th>
-                            <th>Assets</th>
+                            <th>Model</th>
                             <th>Registered</th>
                             <th>
                               <span className="sr-only">Action</span>
@@ -1011,7 +1072,7 @@ function Workspace({ user, role }) {
                                     {r.state} · {r.latitude}, {r.longitude}
                                   </small>
                                 </td>
-                                <td>{r.assetCount}</td>
+                                <td>Save80</td>
                                 <td>{r.date}</td>
                                 <td>
                                   <button
@@ -1044,7 +1105,7 @@ function Workspace({ user, role }) {
                         <span>
                           {error
                             ? "Use Refresh to try again."
-                            : "Register an asset or adjust your search."}
+                            : "Register a Save80 stove or adjust your search."}
                         </span>
                       </div>
                     )}
@@ -1087,13 +1148,14 @@ function Workspace({ user, role }) {
               </div>
             </>
           )}
+          {page === "programme" && <ProgrammePage />}
           {page === "register" && canWrite && (
             <EnrolForm user={user} onSaved={() => load()} />
           )}{" "}
           {page === "team" && role === "admin" && <AccessManager user={user} />}
           <footer className="workspace-footer">
-            <span>ZAMFARA ASSET TRACKER</span>
-            <span>Building a clearer picture of our infrastructure.</span>
+            <span>SAVE80 STOVE TRACKER</span>
+            <span>Less wood. Connected households. Shared progress.</span>
           </footer>
         </main>
       </div>

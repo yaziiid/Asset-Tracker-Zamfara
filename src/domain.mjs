@@ -1,8 +1,15 @@
 export function normalizeRecord(input, now = new Date()) {
   const field = (key, min, max) => {
+    const labels = {
+      name: "Recipient name",
+      address: "Delivery address",
+      phone: "Phone",
+      project: "Product ID",
+      state: "State / region",
+    };
     const value = String(input[key] ?? "").trim();
     if (value.length < min || value.length > max)
-      throw new Error(`${key}: use ${min}–${max} characters.`);
+      throw new Error(`${labels[key] || key}: use ${min}–${max} characters.`);
     return value;
   };
   const coordinate = (key, bound) => {
@@ -19,7 +26,7 @@ export function normalizeRecord(input, now = new Date()) {
     assetCount < 0 ||
     assetCount > 1000000
   )
-    throw new Error("Asset count must be a whole number from 0 to 1,000,000.");
+    throw new Error("Stove count must be a whole number from 0 to 1,000,000.");
   return {
     name: field("name", 2, 120),
     address: field("address", 5, 500),
@@ -73,7 +80,19 @@ export function recordsToCsv(records) {
   return (
     "\uFEFF" +
     [
-      columns.map(cell).join(","),
+      [
+        "recipient_name",
+        "delivery_address",
+        "phone",
+        "product_id",
+        "latitude",
+        "longitude",
+        "state_or_region",
+        "stove_count",
+        "registered_date",
+      ]
+        .map(cell)
+        .join(","),
       ...records.map((row) => columns.map((key) => cell(row[key])).join(",")),
     ].join("\r\n")
   );
@@ -95,4 +114,23 @@ export function legacyRecord(row) {
     data.date = date;
   }
   return data;
+}
+
+// Exact product IDs are preserved, including leading zeroes and punctuation.
+export async function productDocumentId(productId) {
+  const value = String(productId ?? "").trim();
+  if (!value || value.length > 120)
+    throw new Error(
+      "Enter the Product ID printed on the stove (1–120 characters).",
+    );
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value),
+  );
+  return (
+    "stove-" +
+    [...new Uint8Array(digest)]
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("")
+  );
 }

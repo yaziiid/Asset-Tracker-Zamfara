@@ -37,3 +37,11 @@ Actual Firebase provisioning, deployed rules, verified administrator bootstrap, 
 - Real-config production build passed; dependency audit reported zero known vulnerabilities.
 - Local emulator UI verified sign-in, project registration with an optional blank phone, persisted records and filtered table-to-map selection. Test fixtures were kept out of production.
 - Default-deny attack review: public collection listing, unapproved/unverified access, arbitrary paths, orphan subcollections, spoofed creator/timestamp, invalid types/bounds, missing/extra fields, oversized strings, self-role escalation and client record updates/deletes were denied in emulator tests. No status transitions or replay-sensitive counters exist in this append-only model. Membership documents contain only a role; personal Auth profiles are not shared.
+
+## Save80 generalisation (27 October 2026)
+
+The app now represents the TBCN–atmosfair Save80 programme across states and regions. Zamfara government branding and the fixed state default were removed. The programme page and credited stove photograph draw from the supplied 2014 bigEE guide; no measured climate-impact totals are inferred from registration counts.
+
+Each new record represents one physical stove. The exact printed Product ID is preserved as text in `project`, with `assetCount` fixed to 1. Record document IDs use a SHA-256 digest of that Product ID. Firestore validates the digest (normalising its hexadecimal representation to lowercase) and denies overwrites, arbitrary document IDs and concurrent duplicate registration. The deferred importer uses the same identity and refuses grouped counts or duplicate Product IDs for reconciliation before any import.
+
+Validation: 12 application/API tests and 9 Firestore emulator tests pass, including simultaneous duplicate registration, role controls, schema bounds and immutable records. Local UI checks cover multi-state mapping and duplicate-ID feedback. Production build passes. No original MySQL records were accessed, changed or imported during this update. First verified administrator setup remains pending the owner's account confirmation.

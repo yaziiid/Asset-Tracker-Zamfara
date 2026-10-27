@@ -74,3 +74,12 @@ test("legacy migration maps old fields without losing reference formatting or da
   assert.equal(r.date, "2023-05-02");
   assert.throws(() => legacyRecord({ ...base, date: "2023-02-31" }));
 });
+test("product keys preserve printed IDs, support punctuation, and distinguish leading zeroes", async () => {
+  const { productDocumentId } = await import("../src/domain.mjs");
+  assert.equal(
+    await productDocumentId(" 001/S80 "),
+    await productDocumentId("001/S80"),
+  );
+  assert.notEqual(await productDocumentId("001"), await productDocumentId("1"));
+  assert.match(await productDocumentId("001/S80"), /^stove-[a-f0-9]{64}$/);
+});

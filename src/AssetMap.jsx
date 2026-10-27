@@ -6,7 +6,7 @@ export default function AssetMap({ records, selected, onSelect }) {
     map = useRef(null),
     layer = useRef(null);
   useEffect(() => {
-    map.current = L.map(element.current).setView([12.16, 6.66], 7);
+    map.current = L.map(element.current).setView([9.08, 8.68], 6);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -49,14 +49,14 @@ export default function AssetMap({ records, selected, onSelect }) {
         L.latLngBounds(points.map((r) => [r.latitude, r.longitude])),
         { padding: [45, 45], maxZoom: 11 },
       );
-    else map.current.setView([12.16, 6.66], 7);
+    else map.current.setView([9.08, 8.68], 6);
     map.current.invalidateSize();
   }, [records, selected, onSelect]);
   return (
     <div
       ref={element}
       className="asset-map"
-      aria-label="Map of registered assets"
+      aria-label="Map of Save80 recipient households"
     />
   );
 }
