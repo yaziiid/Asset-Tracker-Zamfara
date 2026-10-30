@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Layers, LocateFixed, LoaderCircle } from "lucide-react";
-import { loadGoogleMaps, darkMapStyles } from "./google-maps.mjs";
+import { loadGoogleMaps, mapStyles } from "./google-maps.mjs";
 import {
   readPreference,
   writePreference,
@@ -34,7 +34,7 @@ export default function AssetMap({ records, selected, onSelect, theme }) {
           center: { lat: 9.08, lng: 8.68 },
           zoom: 6,
           mapTypeId: latest.current.mapType,
-          styles: latest.current.theme === "dark" ? darkMapStyles : [],
+          styles: mapStyles(latest.current.theme),
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: true,
@@ -65,7 +65,7 @@ export default function AssetMap({ records, selected, onSelect, theme }) {
     if (!ready || !map.current) return;
     map.current.setOptions({
       mapTypeId: mapType,
-      styles: theme === "dark" ? darkMapStyles : [],
+      styles: mapStyles(theme),
     });
     writePreference("map-type", mapType);
   }, [mapType, theme, ready]);

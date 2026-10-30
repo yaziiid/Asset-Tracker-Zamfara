@@ -63,3 +63,5 @@ The overview is now Map: a full-height Google Maps satellite view with a street 
 The sidebar collapses on desktop and becomes a focus-trapped, dismissible drawer on phones. Partner logos replace the former programme slogan at the bottom of the expanded navigation and disappear when collapsed. Light/dark mode and desktop collapse preferences persist locally. Satellite imagery is not recoloured; the surrounding UI and street map adapt to theme.
 
 A website-restricted public Maps key and a separate server Geocoding key are configured in Netlify. The server key is never included in Vite configuration or tracked source. Geocoding remains guarded by verified Firebase editor/admin authorization. The source and Netlify deployment of the previous version were recorded before edits; this release does not alter Firestore rules or stored records.
+
+Google points-of-interest, transit labels and base-map icons are hidden in both light and dark styles, leaving only stove overlays as markers. The existing production record retains its original registration date and server timestamp after deployment.

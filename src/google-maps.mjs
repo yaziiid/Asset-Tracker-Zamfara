@@ -93,3 +93,13 @@ export const darkMapStyles = [
     stylers: [{ color: "#112a36" }],
   },
 ];
+
+// Keep geographic context while removing Google's venue and transport markers.
+const stoveOnlyStyles = [
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+];
+export function mapStyles(theme) {
+  return [...(theme === "dark" ? darkMapStyles : []), ...stoveOnlyStyles];
+}
