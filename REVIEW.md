@@ -54,3 +54,12 @@ Firebase accepted a controlled verification resend and the owner confirmed email
 Signup email delivery results now live above the signup screen, preventing Auth navigation from hiding a send failure. Resend requests have a 60-second cooldown stored for the current browser session; Firebase throttling produces a longer five-minute retry delay and explains that backend limits can last longer. Failed requests are never labelled successful. Tests cover delayed failure after navigation, concurrent clicks, cooldown persistence after reload and backend throttling. The local Auth emulator UI confirmed successful resend feedback and a disabled timer after refresh.
 
 Both partner logos now appear beneath Save80 branding in the authenticated navigation. Validation: 15 application/API/delivery tests pass and the production build passes; the 9 existing rules tests are unchanged.
+
+
+## Client redesign — 30 October 2026
+
+The overview is now Map: a full-height Google Maps satellite view with a street layer, location fitting, search and state filters. Records contains the summary metrics and a desktop table / mobile cards. The requested marketing headings are removed; the registration form has a concise title. Dates are blank in client-facing records and CSV, while the existing date and server timestamp remain stored and are used for record ordering.
+
+The sidebar collapses on desktop and becomes a focus-trapped, dismissible drawer on phones. Partner logos replace the former programme slogan at the bottom of the expanded navigation and disappear when collapsed. Light/dark mode and desktop collapse preferences persist locally. Satellite imagery is not recoloured; the surrounding UI and street map adapt to theme.
+
+A website-restricted public Maps key and a separate server Geocoding key are configured in Netlify. The server key is never included in Vite configuration or tracked source. Geocoding remains guarded by verified Firebase editor/admin authorization. The source and Netlify deployment of the previous version were recorded before edits; this release does not alter Firestore rules or stored records.

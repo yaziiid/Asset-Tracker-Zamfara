@@ -11,14 +11,13 @@
     "build": "node scripts/check-config.mjs && vite build",
     "build:check": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --test tests/domain.test.mjs tests/geocode.test.mjs tests/verification.test.mjs",
+    "test": "node --test tests/domain.test.mjs tests/geocode.test.mjs tests/verification.test.mjs tests/map-points.test.mjs",
     "test:rules": "npx -y firebase-tools@latest emulators:exec --project demo-zamfara --only firestore 'node --test tests/rules.test.mjs'",
     "import:records": "node scripts/import-records.mjs"
   },
   "dependencies": {
     "firebase": "^13.1.0",
     "jose": "^6.2.13",
-    "leaflet": "^1.9.4",
     "lucide-react": "^1.62.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"

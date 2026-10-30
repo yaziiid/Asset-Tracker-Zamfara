@@ -8,23 +8,24 @@ import {
 } from "react";
 import {
   MapPinned,
-  LayoutDashboard,
   ClipboardList,
   Plus,
-  Search,
   LogOut,
-  Download,
   ArrowUpRight,
   LocateFixed,
   ShieldCheck,
   LoaderCircle,
-  MapPin,
   Users,
-  Package,
   RefreshCw,
   Leaf,
   TreePine,
   BookOpen,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Moon,
+  Sun,
+  X,
 } from "lucide-react";
 import {
   browserLocalPersistence,
@@ -51,6 +52,10 @@ import {
   setDoc,
   startAfter,
 } from "firebase/firestore";
+import Sidebar from "./Sidebar.jsx";
+import RecordsPanel from "./RecordsPanel.jsx";
+import RecordFilters from "./RecordFilters.jsx";
+import { readPreference, writePreference } from "./ui-preferences.mjs";
 import { createVerificationSender } from "./verification.mjs";
 import { PartnerLogos, ProgrammePage } from "./Programme.jsx";
 import { auth, configured, db } from "./firebase.js";
@@ -501,7 +506,7 @@ function EnrolForm({ user, onSaved }) {
       await runTransaction(db, async (transaction) => {
         if ((await transaction.get(reference)).exists())
           throw new Error(
-            "This Product ID is already registered. Check the stove register before trying again.",
+            "This Product ID is already registered. Check Records before trying again.",
           );
         transaction.set(reference, {
           ...record,
@@ -543,12 +548,10 @@ function EnrolForm({ user, onSaved }) {
     <div className="form-panel">
       <div className="panel-heading">
         <div>
-          <span className="eyebrow">REACH ANOTHER HOUSEHOLD</span>
-          <h2>Register a Save80 stove</h2>
+          <h1>Register stove</h1>
           <p className="muted">
-            Enter the Product ID printed on one stove, then link it to the
-            recipient and delivery location. Register each additional stove
-            separately.
+            One Product ID per stove. Add the recipient and delivery location
+            below.
           </p>
         </div>
         <div className="round-icon">
@@ -716,7 +719,7 @@ function AccessManager({ user }) {
   );
 }
 function Workspace({ user, role }) {
-  const [page, setPage] = useState("overview"),
+  const [page, setPage] = useState("map"),
     [records, setRecords] = useState([]),
     [cursor, setCursor] = useState(null),
     [more, setMore] = useState(false),
@@ -726,7 +729,23 @@ function Workspace({ user, role }) {
     [state, setState] = useState(""),
     [sort, setSort] = useState("newest"),
     [selected, setSelected] = useState(null),
-    [tablePage, setTablePage] = useState(0);
+    [collapsed, setCollapsed] = useState(
+      () => readPreference("sidebar-collapsed", "false") === "true",
+    ),
+    [mobileOpen, setMobileOpen] = useState(false),
+    [isMobile, setIsMobile] = useState(
+      () => window.matchMedia("(max-width: 850px)").matches,
+    ),
+    [theme, setTheme] = useState(() =>
+      readPreference(
+        "theme",
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light",
+      ) === "dark"
+        ? "dark"
+        : "light",
+    );
   const canWrite = ["editor", "admin"].includes(role);
   const load = useCallback(async (after = null) => {
     setLoading(true);
@@ -758,22 +777,41 @@ function Workspace({ user, role }) {
     load();
     return () => setRecords([]);
   }, [load]);
+
   useEffect(() => {
-    setTablePage(0);
-  }, [search, state, sort]);
+    const query = window.matchMedia("(max-width: 850px)");
+    const change = () => {
+      setIsMobile(query.matches);
+      setMobileOpen(false);
+    };
+    query.addEventListener("change", change);
+    return () => query.removeEventListener("change", change);
+  }, []);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    writePreference("theme", theme);
+  }, [theme]);
+  useEffect(() => writePreference("sidebar-collapsed", collapsed), [collapsed]);
   const filtered = useMemo(
     () => filterRecords(records, search, state, sort),
     [records, search, state, sort],
   );
   const select = useCallback((id) => setSelected(id), []);
-  const active = records.find((r) => r.id === selected);
+  const closeNavigation = useCallback(() => setMobileOpen(false), []);
+  const navigate = (id) => {
+    setPage(id);
+    setMobileOpen(false);
+  };
+  const active = filtered.find((r) => r.id === selected);
   const nav = [
-    ["overview", LayoutDashboard, "Overview"],
-    ["records", ClipboardList, "Stove register"],
+    ["map", MapPinned, "Map"],
+    ["records", ClipboardList, "Records"],
     ...(canWrite ? [["register", Plus, "Register stove"]] : []),
     ["programme", BookOpen, "About Save80"],
     ...(role === "admin" ? [["team", Users, "Team access"]] : []),
   ];
+  const loadMore = () => load(cursor);
   function exportCsv() {
     const blob = new Blob([recordsToCsv(filtered)], {
         type: "text/csv;charset=utf-8",
@@ -781,408 +819,166 @@ function Workspace({ user, role }) {
       url = URL.createObjectURL(blob),
       a = document.createElement("a");
     a.href = url;
-    a.download = `save80-deliveries-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `save80-records-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   return (
-    <div className="workspace">
-      <aside className="sidebar">
-        <Brand compact />
-        <div className="sidebar-partners">
-          <PartnerLogos compact />
-        </div>
-        <div className="workspace-label">YOUR WORKSPACE</div>
-        <nav>
-          {nav.map(([id, Icon, name]) => (
-            <button
-              className={page === id ? "active" : ""}
-              key={id}
-              onClick={() => setPage(id)}
-            >
-              <Icon size={19} />
-              {name}
-              {id === "register" && <span className="nav-plus">+</span>}
-            </button>
-          ))}
-          <button className="mobile-signout" onClick={() => signOut(auth)}>
-            <LogOut size={18} />
-            Sign out
-          </button>
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="state-card">
-            <span>TBCN × atmosfair</span>
-            <small>
-              One programme.
-              <br />
-              Many communities.
-            </small>
-            <Leaf size={23} />
-          </div>
-          <div className="profile">
-            <div className="avatar">
-              {(user.displayName || user.email || "U")
-                .slice(0, 1)
-                .toUpperCase()}
-            </div>
-            <div>
-              <strong>{user.displayName || user.email?.split("@")[0]}</strong>
-              <small>{role}</small>
-            </div>
-            <button
-              aria-label="Sign out"
-              title="Sign out"
-              onClick={() => signOut(auth)}
-            >
-              <LogOut size={18} />
-            </button>
-          </div>
-        </div>
-      </aside>
+    <div
+      className={`workspace redesigned-workspace ${collapsed ? "sidebar-collapsed" : ""}`}
+    >
+      <Sidebar
+        {...{ nav, page, collapsed, isMobile, user, role }}
+        open={mobileOpen}
+        onClose={closeNavigation}
+        onNavigate={navigate}
+        onSignOut={() => signOut(auth)}
+      />
       <div className="main-workspace">
         <header className="topbar">
-          <span>
-            Programme portal{" "}
-            <span className="breadcrumb">
-              / {nav.find((n) => n[0] === page)?.[2]}
-            </span>
-          </span>
-          <span className="state-badge">
-            <Leaf size={12} /> Across communities
-          </span>
-        </header>
-        <main className="content">
-          <div className="page-heading">
-            <div>
-              <span className="eyebrow">
-                TBCN × ATMOSFAIR · SAVE80 PROGRAMME
-              </span>
-              <h1>
-                {page === "overview"
-                  ? "Every stove, a household."
-                  : page === "records"
-                    ? "The Save80 register."
-                    : page === "programme"
-                      ? "Cooking with purpose."
-                      : page === "team"
-                        ? "A connected team."
-                        : "A new delivery. A lasting connection."}
-              </h1>
-              <p className="muted">
-                {page === "overview"
-                  ? "Follow stove deliveries and household reach across communities."
-                  : page === "records"
-                    ? "Find recipients, Product IDs and locations across the programme."
-                    : page === "programme"
-                      ? "Explore the stoves, the purpose and the partnership."
-                      : page === "team"
-                        ? "Manage who can use your programme workspace."
-                        : "Register Save80 stoves and the households they are delivered to."}
-              </p>
-            </div>
-            {canWrite && !["register", "team", "programme"].includes(page) && (
-              <button className="primary" onClick={() => setPage("register")}>
-                <Plus size={18} />
-                Register stove
-              </button>
-            )}
+          <div className="topbar-title">
+            <button
+              className="navigation-toggle icon-button"
+              aria-label={
+                isMobile
+                  ? "Open navigation"
+                  : collapsed
+                    ? "Expand sidebar"
+                    : "Collapse sidebar"
+              }
+              aria-controls="programme-navigation"
+              aria-expanded={isMobile ? mobileOpen : !collapsed}
+              onClick={() =>
+                isMobile ? setMobileOpen(true) : setCollapsed((v) => !v)
+              }
+            >
+              {isMobile ? (
+                <Menu size={22} />
+              ) : collapsed ? (
+                <PanelLeftOpen size={22} />
+              ) : (
+                <PanelLeftClose size={22} />
+              )}
+            </button>
+            <span>{nav.find((n) => n[0] === page)?.[2]}</span>
           </div>
-          {["overview", "records"].includes(page) && (
-            <>
-              <div className="stats">
-                <article>
-                  <div className="stat-label">
-                    SAVE80 STOVES REGISTERED
-                    <Package size={18} />
-                  </div>
-                  <strong>
-                    {records.length.toLocaleString()}
-                    {more ? "+" : ""}
-                  </strong>
-                  <span>
-                    {more
-                      ? "Loaded records · more available"
-                      : "Individual stove records"}
-                  </span>
-                </article>
-                <article>
-                  <div className="stat-label">
-                    STATES / REGIONS
-                    <ClipboardList size={18} />
-                  </div>
-                  <strong>
-                    {new Set(
-                      records
-                        .map((record) =>
-                          String(record.state ?? "")
-                            .trim()
-                            .toLocaleLowerCase(),
-                        )
-                        .filter(Boolean),
-                    ).size.toLocaleString()}
-                  </strong>
-                  <span>Where registered stoves are located</span>
-                </article>
-                <article>
-                  <div className="stat-label">
-                    DELIVERIES MAPPED
-                    <MapPin size={18} />
-                  </div>
-                  <strong>
-                    {records
-                      .filter(
-                        (r) =>
-                          Number.isFinite(r.latitude) &&
-                          Number.isFinite(r.longitude),
-                      )
-                      .length.toLocaleString()}
-                  </strong>
-                  <span>Delivery records with coordinates</span>
-                </article>
+          <button
+            className="theme-toggle secondary small"
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            onClick={() =>
+              setTheme((value) => (value === "dark" ? "light" : "dark"))
+            }
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
+          </button>
+        </header>
+        <main className={`content ${page === "map" ? "map-content" : ""}`}>
+          {page === "map" && (
+            <section className="map-page" aria-label="Household map">
+              <h1 className="sr-only">Map</h1>
+              <Suspense
+                fallback={
+                  <div className="map-service-status">Loading map…</div>
+                }
+              >
+                <AssetMap
+                  records={filtered}
+                  selected={selected}
+                  onSelect={select}
+                  theme={theme}
+                />
+              </Suspense>
+              <div className="map-toolbar">
+                <RecordFilters
+                  {...{ records, search, setSearch, state, setState }}
+                />
+                <button
+                  className="map-refresh icon-button"
+                  disabled={loading}
+                  title="Refresh records"
+                  aria-label="Refresh records"
+                  onClick={() => load()}
+                >
+                  <RefreshCw size={19} className={loading ? "spin" : ""} />
+                </button>
               </div>
-              <Notice error>{error}</Notice>
-              <div className="data-panel">
-                <div className="data-heading">
+              {error && (
+                <div className="map-notice notice error" role="alert">
+                  {error}
+                </div>
+              )}
+              {active && (
+                <aside
+                  className="map-selected-record"
+                  aria-label="Selected household"
+                >
                   <div>
-                    <h2>
-                      {page === "overview"
-                        ? "Delivery locations"
-                        : "Stove deliveries"}
-                      <span className="count">{filtered.length}</span>
-                    </h2>
-                    <p className="muted small-text">
-                      {more
-                        ? "Search and totals cover loaded records. Load more to include older entries."
-                        : "From a Product ID to the household it serves."}
-                    </p>
-                  </div>
-                  <div className="button-row">
+                    <strong>{active.project}</strong>
                     <button
-                      className="secondary small"
-                      onClick={() => load()}
-                      disabled={loading}
+                      className="icon-button"
+                      aria-label="Clear selection"
+                      onClick={() => setSelected(null)}
                     >
-                      <RefreshCw size={15} />
-                      Refresh
-                    </button>
-                    <button
-                      className="secondary small"
-                      disabled={!filtered.length}
-                      onClick={exportCsv}
-                    >
-                      <Download size={15} />
-                      Export CSV
+                      <X size={17} />
                     </button>
                   </div>
+                  <h2>{active.name}</h2>
+                  <p>{active.address}</p>
+                  <span>
+                    {active.state} · {active.latitude}, {active.longitude}
+                  </span>
+                </aside>
+              )}
+              {(more || loading) && (
+                <div className="map-loading-status" role="status">
+                  {loading ? (
+                    "Loading records…"
+                  ) : (
+                    <>
+                      <span>{records.length} records loaded</span>
+                      <button className="text-button" onClick={loadMore}>
+                        Load older records
+                      </button>
+                    </>
+                  )}
                 </div>
-                <div className="filters">
-                  <div className="search-input">
-                    <Search size={17} />
-                    <input
-                      aria-label="Search recipients and stoves"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Search recipient, Product ID or address…"
-                    />
-                  </div>
-                  <select
-                    aria-label="Filter by state or region"
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                  >
-                    <option value="">All states / regions</option>
-                    {[...new Set(records.map((r) => r.state).filter(Boolean))]
-                      .sort()
-                      .map((s) => (
-                        <option key={s}>{s}</option>
-                      ))}
-                  </select>
-                  <select
-                    aria-label="Sort deliveries"
-                    value={sort}
-                    onChange={(e) => setSort(e.target.value)}
-                  >
-                    <option value="newest">Newest first</option>
-                    <option value="name">Recipient A–Z</option>
-                    <option value="project">Product ID A–Z</option>
-                  </select>
-                </div>
-                {loading && !records.length ? (
-                  <div className="empty">
-                    <LoaderCircle className="spin" />
-                    Loading records…
-                  </div>
-                ) : page === "overview" ? (
-                  <>
-                    <div className="map-wrap">
-                      <Suspense
-                        fallback={<div className="empty">Loading map…</div>}
-                      >
-                        <AssetMap
-                          records={filtered}
-                          selected={selected}
-                          onSelect={select}
-                        />
-                      </Suspense>
-                      {!filtered.length && (
-                        <div className="map-empty">
-                          <MapPinned size={25} />
-                          <strong>
-                            {records.length
-                              ? "No matching deliveries"
-                              : error
-                                ? "Records could not be loaded"
-                                : "Your map starts here"}
-                          </strong>
-                          <span>
-                            {records.length
-                              ? "Try a different search or region."
-                              : error
-                                ? "Use Refresh to try again."
-                                : "Register your first stove delivery to put a household on the map."}
-                          </span>
-                        </div>
-                      )}
-                      <div className="map-key">
-                        <span />
-                        Registered household <span className="gold" />
-                        Selected household
-                      </div>
-                    </div>
-                    {active && (
-                      <div className="selected-record">
-                        <MapPin size={18} />
-                        <strong>{active.project}</strong>
-                        <span>
-                          {active.name} · {active.address}
-                        </span>
-                        <button
-                          className="text-button"
-                          onClick={() => setSelected(null)}
-                        >
-                          Clear selection
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <div className="table-scroll">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Product ID</th>
-                            <th>Recipient</th>
-                            <th>Location</th>
-                            <th>Model</th>
-                            <th>Registered</th>
-                            <th>
-                              <span className="sr-only">Action</span>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filtered
-                            .slice(tablePage * 25, tablePage * 25 + 25)
-                            .map((r) => (
-                              <tr key={r.id}>
-                                <td>
-                                  <strong>{r.project}</strong>
-                                  <small>{r.phone || "—"}</small>
-                                </td>
-                                <td>{r.name}</td>
-                                <td>
-                                  {r.address}
-                                  <small>
-                                    {r.state} · {r.latitude}, {r.longitude}
-                                  </small>
-                                </td>
-                                <td>Save80</td>
-                                <td>{r.date}</td>
-                                <td>
-                                  <button
-                                    className="icon-button"
-                                    title={`Show ${r.project} on map`}
-                                    aria-label={`Show ${r.project} on map`}
-                                    onClick={() => {
-                                      setSearch("");
-                                      setState("");
-                                      select(r.id);
-                                      setPage("overview");
-                                    }}
-                                  >
-                                    <ArrowUpRight size={17} />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    {!filtered.length && (
-                      <div className="empty">
-                        <ClipboardList size={28} />
-                        <strong>
-                          {error
-                            ? "Records could not be loaded"
-                            : "No records to display"}
-                        </strong>
-                        <span>
-                          {error
-                            ? "Use Refresh to try again."
-                            : "Register a Save80 stove or adjust your search."}
-                        </span>
-                      </div>
-                    )}
-                    <div className="pagination">
-                      <span>
-                        {filtered.length ? tablePage * 25 + 1 : 0}–
-                        {Math.min((tablePage + 1) * 25, filtered.length)} of{" "}
-                        {filtered.length} loaded records
-                      </span>
-                      <div className="button-row">
-                        <button
-                          className="secondary small"
-                          disabled={tablePage === 0}
-                          onClick={() => setTablePage((p) => p - 1)}
-                        >
-                          Previous
-                        </button>
-                        <button
-                          className="secondary small"
-                          disabled={(tablePage + 1) * 25 >= filtered.length}
-                          onClick={() => setTablePage((p) => p + 1)}
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-                {more && (
-                  <div className="load-more">
-                    <button
-                      className="secondary"
-                      disabled={loading}
-                      onClick={() => load(cursor)}
-                    >
-                      {loading ? "Loading…" : "Load older records"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
+              )}
+            </section>
+          )}
+          {page === "records" && (
+            <RecordsPanel
+              {...{
+                records,
+                filtered,
+                more,
+                loading,
+                error,
+                load,
+                loadMore,
+                canWrite,
+                exportCsv,
+                search,
+                setSearch,
+                state,
+                setState,
+                sort,
+                setSort,
+              }}
+              onRegister={() => navigate("register")}
+              onMap={(id) => {
+                setSearch("");
+                setState("");
+                select(id);
+                navigate("map");
+              }}
+            />
           )}
           {page === "programme" && <ProgrammePage />}
           {page === "register" && canWrite && (
             <EnrolForm user={user} onSaved={() => load()} />
-          )}{" "}
+          )}
           {page === "team" && role === "admin" && <AccessManager user={user} />}
-          <footer className="workspace-footer">
-            <span>SAVE80 STOVE TRACKER</span>
-            <span>Less wood. Connected households. Shared progress.</span>
-          </footer>
         </main>
       </div>
     </div>

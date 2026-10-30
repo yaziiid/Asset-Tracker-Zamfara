@@ -93,7 +93,9 @@ export function recordsToCsv(records) {
       ]
         .map(cell)
         .join(","),
-      ...records.map((row) => columns.map((key) => cell(row[key])).join(",")),
+      ...records.map((row) =>
+        columns.map((key) => cell(key === "date" ? "" : row[key])).join(","),
+      ),
     ].join("\r\n")
   );
 }

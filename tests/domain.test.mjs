@@ -83,3 +83,10 @@ test("product keys preserve printed IDs, support punctuation, and distinguish le
   assert.notEqual(await productDocumentId("001"), await productDocumentId("1"));
   assert.match(await productDocumentId("001/S80"), /^stove-[a-f0-9]{64}$/);
 });
+test("client-facing CSV leaves dates blank without changing stored registration dates", () => {
+  const registered = normalizeRecord(base, new Date("2026-10-30T12:00:00Z"));
+  const csv = recordsToCsv([registered]);
+  assert.equal(registered.date, "2026-10-30");
+  assert.ok(!csv.includes("2026-10-30"));
+  assert.ok(csv.split("\r\n")[1].endsWith(',""'));
+});

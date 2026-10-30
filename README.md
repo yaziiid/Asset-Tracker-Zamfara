@@ -6,17 +6,19 @@ A Netlify frontend backed by Firebase Authentication and Cloud Firestore Standar
 
 - Email/password accounts, verification email with persistent delivery feedback and a resend cooldown, password reset and explicit session/remember-me choice.
 - Administrator-approved team access: viewer, editor and administrator.
-- Individual Save80 stove registration, optional phone, string Product IDs, recipient households and validated coordinates.
-- Interactive location map, text/state filters, sorting, stable record selection, paginated records and CSV export with formula injection protection.
+- Individual Save80 stove registration, optional phone, string Product IDs, recipient households and validated coordinates. Date values are blank in Records and its CSV export; the actual registration date and server timestamp remain in Firestore.
+- Full-height Google satellite/street map, text/state filters, sorting, stable record selection, paginated Records and CSV export with formula injection protection.
 - 250-record database pages, 25-row table pages and explicit load-more. Search, totals, map and export cover the loaded records; load older records to include them.
 - Optional authenticated, rate-limited Netlify geocoding function; manual coordinates work without Google API billing.
 - Append-only records: correction/deletion requires an administrator using trusted backend tools. The original app also did not offer record editing.
+
+- Responsive sidebar drawer on phones, collapsible desktop navigation, mobile record cards, and persistent light/dark mode. Partner logos are at the bottom of the expanded sidebar and hidden when collapsed.
 
 ## Local development
 
 Use Node.js 22 LTS (22.12+) and npm. Run `npm ci`, copy `.env.example` to `.env`, fill in your Firebase web config, and run `npm run dev`.
 
-`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` and `VITE_FIREBASE_APP_ID` are public web configuration. Never put a service-account private key, database password or Google server key in a `VITE_` variable. No Admin SDK credentials are needed by the deployed website.
+`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` and `VITE_FIREBASE_APP_ID` are public web configuration. `VITE_GOOGLE_MAPS_API_KEY` is the separate browser map key; restrict it to the site hostname and Maps JavaScript API. The map defaults to satellite imagery with a street-layer switch. Never put a service-account private key, database password or Google server key in a `VITE_` variable. No Admin SDK credentials are needed by the deployed website.
 
 ## Firebase setup
 
@@ -34,11 +36,11 @@ Accounts are now identified by email. Existing MySQL usernames/passwords are not
 
 - Import this repository and select the migration branch (or main after merge).
 - Build command: `npm run build`; publish directory: `dist`; Functions directory: `netlify/functions`; Node: 22.
-- Set the four `VITE_FIREBASE_*` variables above for builds **and Functions**. Build fails if any is absent.
-- Optional: set `GOOGLE_GEOCODING_API_KEY` for Functions only, enable the Google Geocoding API, restrict the key to that API and configure quotas. The key is never sent to the browser. Without this key, Find coordinates reports its unavailability and users enter coordinates manually.
+- Set the four `VITE_FIREBASE_*` variables above for builds **and Functions**, and `VITE_GOOGLE_MAPS_API_KEY` for builds. Build fails if any public configuration is absent.
+- Set `GOOGLE_GEOCODING_API_KEY` for Functions, enable the Google Geocoding API, restrict this separate server key to that API and configure quotas. A website/referrer-restricted browser key cannot be used for server-side geocoding. The key is never sent to the browser. Without this key, Find coordinates reports its unavailability and users enter coordinates manually.
 - Deploy, then verify sign-in, access checks, registration, map selection and CSV export on the live hostname. Netlify deploy previews use the same backend if given production configuration; use a separate Firebase project for isolated testing.
 
-`netlify.toml` defines SPA routing, API routing and security headers. The map uses OpenStreetMap tiles with attribution; follow their tile usage policy before scaling traffic. Records are rendered as text; map popups do not interpret database values as HTML.
+`netlify.toml` defines SPA routing, API routing and security headers. The map uses Google Maps JavaScript API with its required attribution. Enable the API in the Google Cloud project associated with the website-restricted browser key. Satellite is the default view. Map script, tile, font, worker and connection domains are allowed explicitly in the CSP; inline script execution remains blocked. Records are rendered as text; map popups do not interpret database values as HTML.
 
 ## Existing record migration
 
@@ -72,4 +74,8 @@ The Save80 programme page uses product background and a credited stove photograp
 
 Existing data migration is deferred at the user's request. No original database records have been changed or imported. Historical resource IDs and repository names may retain Zamfara internally; they do not restrict programme locations.
 
-Partner logos are displayed beneath the Save80 brand in the authenticated navigation panel as well as on the public programme pages.
+Partner logos are displayed at the bottom of the expanded authenticated navigation and on public programme pages. They are hidden when the sidebar is collapsed.
+
+## Rollback before the 30 October client redesign
+
+The previous production version is preserved at commit `f371ba1daddd3213b224782d6e62c346c60a2552` on branch `backup/save80-before-client-redesign-2026-10-30`. The retained Netlify production deploy is `6ae1065ee362a505a765ae73`. Publish that retained deployment in Netlify to restore the earlier UI, or deploy the backup branch. Keep an eye on auto-publishing so a later push does not replace a deliberate rollback. No database migration or rules change is part of this redesign.
